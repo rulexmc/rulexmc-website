@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-950: #050405;
+  --color-ink-900: #0a0809;
+  --color-ink-850: #0f0c0d;
+  --color-ink-800: #151112;
+  --color-ink-700: #1f191a;
+  --color-ink-600: #2c2425;
+  --color-blood-300: #ff8a8f;
+  --color-blood-400: #ff4d57;
+  --color-blood-500: #ef1c2b;
+  --color-blood-600: #c8101f;
+  --color-blood-700: #8f0b17;
+  --color-blood-900: #3a0409;
+  --color-bone-100: #f4eeee;
+  --color-bone-200: #e2d9da;
+  --color-bone-300: #c9bfc0;
+  --color-bone-400: #a59a9b;
+  --font-display: var(--font-orbitron), ui-sans-serif, system-ui, sans-serif;
+  --font-hud: var(--font-rajdhani), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --animate-pulse-red: pulse-red 2.4s ease-in-out infinite;
+  --animate-rise: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(239 28 43 / 0.55); }
+    50% { box-shadow: 0 0 0 8px rgb(239 28 43 / 0); }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@layer base {
+  html { color-scheme: dark; scroll-behavior: smooth; }
+  body {
+    @apply bg-ink-950 text-bone-100 font-sans antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 80% -10%, rgb(200 16 31 / 0.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgb(143 11 23 / 0.14), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection { background: rgb(239 28 43 / 0.45); color: #fff; }
+  :focus-visible { outline: 2px solid var(--color-blood-400); outline-offset: 3px; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-hud text-base font-bold uppercase tracking-[0.14em] transition duration-200 select-none disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@utility panel {
+  @apply relative rounded-xl border border-white/[0.07] bg-ink-850/80 backdrop-blur-sm;
+  box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 20px 50px -30px rgb(0 0 0 / 0.9);
+}
+
+@layer components {
+  .btn-red {
+    @apply btn text-white bg-gradient-to-b from-blood-500 to-blood-700 border border-blood-400/60;
+    box-shadow: 0 0 0 1px rgb(255 77 87 / 0.15) inset, 0 8px 28px -6px rgb(239 28 43 / 0.65), 0 0 18px rgb(239 28 43 / 0.35);
+  }
+  .btn-red:not(:disabled):hover {
+    @apply from-blood-400 to-blood-600 -translate-y-0.5;
+    box-shadow: 0 0 0 1px rgb(255 138 143 / 0.3) inset, 0 12px 36px -6px rgb(239 28 43 / 0.85), 0 0 28px rgb(239 28 43 / 0.55);
+  }
+  .btn-ghost {
+    @apply btn text-bone-100 border border-bone-100/15 bg-white/[0.03] hover:border-blood-400/70 hover:text-white hover:bg-blood-500/10;
+  }
+  .btn-sm { @apply px-3 py-2 text-sm tracking-[0.1em]; }
+  .panel-glow { @apply panel; border-color: rgb(239 28 43 / 0.35); box-shadow: 0 0 0 1px rgb(239 28 43 / 0.08) inset, 0 0 40px -12px rgb(239 28 43 / 0.45); }
+  .eyebrow { @apply font-hud text-sm font-semibold uppercase tracking-[0.3em] text-blood-400; }
+  .h-display { @apply font-display font-black uppercase tracking-wide; }
+  .field { @apply block w-full rounded-md border border-white/10 bg-ink-900 px-3.5 py-2.5 text-bone-100 placeholder:text-bone-400/60 transition focus:border-blood-400 focus:outline-none focus:ring-2 focus:ring-blood-500/40 aria-[invalid=true]:border-blood-400; }
+  .label { @apply mb-1.5 block font-hud text-sm font-semibold uppercase tracking-[0.12em] text-bone-300; }
+  .field-error { @apply mt-1 text-sm text-blood-300; }
+  .badge { @apply inline-flex items-center gap-1.5 rounded px-2 py-0.5 font-hud text-xs font-bold uppercase tracking-[0.14em]; }
+  .table-head { @apply font-hud text-xs font-semibold uppercase tracking-[0.18em] text-bone-400; }
+  .link { @apply text-blood-300 underline decoration-blood-500/40 underline-offset-4 hover:text-white hover:decoration-blood-400; }
+  .block-grid {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .scanlines::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.02) 0 1px, transparent 1px 3px);
+  }
+  .text-glow { text-shadow: 0 0 24px rgb(239 28 43 / 0.55), 0 0 2px rgb(255 120 128 / 0.6); }
+}

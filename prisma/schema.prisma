@@ -1,0 +1,232 @@
+// RuleXMC website data model (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PLAYER
+  ADMIN
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum ReportCategory {
+  CHEATING
+  GRIEFING
+  CHAT_ABUSE
+  SCAM
+  BUG
+  OTHER
+}
+
+enum ListingKind {
+  RANK
+  KIT
+  PERK
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  displayName    String
+  passwordHash   String
+  role           Role           @default(PLAYER)
+  mcUsername     String?        @unique
+  mcUuid         String?
+  mcVerified     Boolean        @default(false)
+  mcVerifiedAt   DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  sessions       Session[]
+  announcements  Announcement[]
+  reports        Report[]       @relation("ReportReporter")
+  handledReports Report[]       @relation("ReportHandler")
+  auditLogs      AuditLog[]
+  activities     Activity[]
+  linkCodes      LinkCode[]
+  purchases      Purchase[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  published Boolean  @default(true)
+  pinned    Boolean  @default(false)
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, pinned, createdAt])
+}
+
+/// Editable text blocks (rules, FAQ, join instructions, shop info, ...)
+model ContentBlock {
+  key       String   @id
+  title     String
+  body      String
+  updatedAt DateTime @updatedAt
+}
+
+model Report {
+  id          String         @id @default(cuid())
+  reporterId  String
+  reporter    User           @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetName  String
+  category    ReportCategory
+  description String
+  evidenceUrl String?
+  status      ReportStatus   @default(OPEN)
+  adminNote   String?
+  handledById String?
+  handledBy   User?          @relation("ReportHandler", fields: [handledById], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@index([reporterId])
+}
+
+model StoreListing {
+  id            String      @id @default(cuid())
+  slug          String      @unique
+  name          String
+  kind          ListingKind @default(RANK)
+  tagline       String      @default("")
+  description   String      @default("")
+  priceCents    Int
+  currency      String      @default("USD")
+  features      String[]
+  highlight     Boolean     @default(false)
+  active        Boolean     @default(true)
+  sortOrder     Int         @default(0)
+  /// Tebex package checkout URL (used when PAYMENT_PROVIDER=tebex)
+  tebexUrl      String?
+  /// Stripe Price ID (used when PAYMENT_PROVIDER=stripe)
+  stripePriceId String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  purchases     Purchase[]
+
+  @@index([active, kind, sortOrder])
+}
+
+model Purchase {
+  id          String         @id @default(cuid())
+  userId      String?
+  user        User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  listingId   String?
+  listing     StoreListing?  @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  provider    String
+  providerRef String         @unique
+  status      PurchaseStatus @default(PENDING)
+  amountCents Int?
+  currency    String?
+  mcUsername  String?
+  delivered   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId])
+}
+
+/// Player statistics pushed by the game server via POST /api/ingest/stats.
+model PlayerStats {
+  uuid            String    @id
+  name            String
+  nameLower       String
+  kills           Int       @default(0)
+  deaths          Int       @default(0)
+  balance         Decimal   @default(0) @db.Decimal(18, 2)
+  playtimeSeconds Int       @default(0)
+  hearts          Int?
+  hasBalance      Boolean   @default(false)
+  lastSeen        DateTime?
+  source          String    @default("ingest")
+  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime  @default(now())
+
+  @@index([nameLower])
+  @@index([kills])
+  @@index([deaths])
+  @@index([balance])
+  @@index([playtimeSeconds])
+}
+
+/// One-time in-game verification codes for Minecraft account linking.
+model LinkCode {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code       String    @unique
+  mcUsername String
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action    String
+  target    String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+/// Fixed-window rate limit counters (works across multiple app instances).
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}

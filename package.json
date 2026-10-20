@@ -1,0 +1,52 @@
+{
+  "name": "rulexmc-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Official website for the RuleXMC Lifesteal Minecraft server",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "stats:sync": "node scripts/sync-vanilla-stats.mjs",
+    "smoke": "bash scripts/smoke.sh",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "2.2.2",
+    "@prisma/client": "6.19.3",
+    "next": "15.5.28",
+    "react": "19.2.9",
+    "react-dom": "19.2.9",
+    "server-only": "^0.0.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^20.19.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "15.5.28",
+    "prisma": "6.19.3",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}
