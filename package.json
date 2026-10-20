@@ -18,7 +18,8 @@
     "admin:create": "tsx scripts/create-admin.ts",
     "stats:sync": "node scripts/sync-vanilla-stats.mjs",
     "smoke": "bash scripts/smoke.sh",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma migrate deploy && tsx prisma/seed.ts && tsx scripts/create-admin.ts && next build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
