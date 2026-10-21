@@ -1,10 +1,11 @@
 # RuleXMC Website
 
-Official website for **RuleXMC**, a Lifesteal SMP for Minecraft: Java Edition.
-Dark, red-accented "premium gaming" design, live server status, leaderboards fed by the game server,
+Official website for **RuleX MC** (the RuleX Network): Lifesteal, Survival and PvP Practice for Minecraft Java + Bedrock (crossplay, 1.9 – 26.2+).
+Black and deep-red "premium gaming" design, live server status, leaderboards fed by the game server,
 a store with a payment provider abstraction, a player portal, and an admin dashboard.
 
-> Default server address: `rulexmc.mcsh.io` (set in `.env` → `MC_SERVER_ADDRESS`; it's only defined in `src/lib/config.ts` and `.env.example`).
+> Default server address: `rulexmc.mcsh.io` (set in `.env` → `MC_SERVER_ADDRESS`).
+> All verified server facts used in marketing copy (versions, Bedrock port, realms, FAQ, vote pages, Discord invite) live in **`src/lib/site.ts`**. Edit that file, not individual pages, and only add facts the owner has confirmed. Live numbers never go there.
 
 ---
 
@@ -41,14 +42,16 @@ Runtime dependencies: `next`, `react`, `react-dom`, `@prisma/client`, `@node-rs/
 
 ## Features
 
-- **Home**: logo, "YOUR HEART. YOUR SURVIVAL." hero, copy-to-clipboard server IP (with fallback), live status and player count, PLAY NOW / LEADERBOARDS / STORE, gameplay features, the latest 3 announcements from the DB, and a footer whose community links are hidden when unset.
-- **Server** (`/server`): edition and version (from live status, or `MC_VERSION_LABEL`), address, status, MOTD, join steps, Lifesteal explanation, rules, and an FAQ accordion. All copy can be edited in the admin dashboard.
+- **Home**: "YOUR HEART. YOUR SURVIVAL." hero, copy-to-clipboard server IP (with fallback), live status chip and player count, PLAY NOW / LEADERBOARDS / STORE, realm cards (Lifesteal / Survival / PvP Practice), network features, Java + Bedrock join guide, top-5 kills teaser, latest announcements, Discord call-to-action (real member/online counts from Discord's public invite API, hidden on failure), vote links, FAQ preview.
+- **Server** (`/server`): connection & compatibility facts (Java IP, Bedrock IP + port 19132, versions, Paper 26.2, cracked + premium via AuthMe, region, owner), live status, live MOTD (or the official MOTD when the lookup fails), step-by-step join guide for both editions, realm details, Lifesteal mechanics, rules block, network features and a full FAQ (with FAQPage JSON-LD). The Lifesteal / rules blocks, plus optional `server.join` / `server.faq` extras, are editable in the admin dashboard.
+- **`/discord`**: short redirect to the Discord invite.
 - **Leaderboards** (`/leaderboards`): kills, deaths, balance and playtime. Ascending/descending sort, pagination, name search, and mc-heads.net avatars. The data comes from a `StatsProvider`. Sample data always carries a **"SAMPLE DATA — NOT LIVE"** badge and a notice.
-- **Store** (`/store`): rank cards, an auto-generated feature comparison table, kits and perks, and shop / auction house / kits info blocks. Purchase buttons go through the payment abstraction. When nothing is configured they're disabled and read **"Payments not configured"**.
+- **Store** (`/store`): "store not open yet" notice, rank cards, an auto-generated feature comparison table, kits and perks, and info blocks. Listings flagged **Example** (`isExample`, toggle in `/admin/store`; the seeded ones are examples) carry an "Example" badge and "example price" label. Purchase buttons go through the payment abstraction. When nothing is configured they're disabled and read **"Payments not configured"**.
 - **Player portal** (`/portal`): register, log in, link a Minecraft username, verify ownership with an in-game code, skin render, stats with leaderboard rank, K/D, hearts, balance and playtime (when reported), recent activity, and player reports (`/portal/reports`).
 - **Admin** (`/admin`, ADMIN only, checked on the server in the layout, every page and every action): overview (live status, stats summary, integration checklist, recent accounts with promote/demote), CRUD for announcements, editable content blocks, a report review queue, store listings, and a paginated **audit log**. There's deliberately **no console, RCON or server power control**.
 - **Status**: fetched on the server from mcsrvstat.us (Next data cache, 60 s) or a built-in Java **Server List Ping** (`STATUS_SOURCE=ping`, cached in memory). The client refreshes `/api/status` every 60 s. On failure it shows **"Status unavailable"**. It never shows hardcoded numbers.
-- **Quality**: loading skeletons, error and global-error boundaries, a custom 404, empty states, `prefers-reduced-motion` support (particles off, no animation), a skip link, labelled fields with `aria-invalid`, security headers, rate limits, `robots.txt` and `sitemap.xml`.
+- **SEO & social**: per-page titles, descriptions and canonical URLs (`src/lib/seo.ts`), Open Graph + Twitter `summary_large_image` tags, a generated OG image (`src/app/opengraph-image.tsx`), SVG favicon + generated Apple touch icon, web manifest, Organization/WebSite JSON-LD, `robots.txt` and `sitemap.xml`. Metadata is always rendered in the initial `<head>` (`htmlLimitedBots`).
+- **Quality**: mobile menu with focus trap, Esc to close and scroll lock, active-page nav state, loading skeletons, error and global-error boundaries, a custom 404, empty states, `prefers-reduced-motion` support (particles off, no animation), a skip link, labelled fields with `aria-invalid`, security headers, rate limits, `robots.txt` and `sitemap.xml`.
 
 ## Folder structure
 
@@ -135,15 +138,16 @@ Every variable is documented in [`.env.example`](./.env.example). The main ones:
 | Variable | Default | Notes |
 |---|---|---|
 | `DATABASE_URL` | — | PostgreSQL URL (required) |
-| `SITE_URL` | `http://localhost:3000` | Public URL, used for Stripe redirects, the sitemap and metadata |
+| `SITE_URL` | Vercel production domain, else `http://localhost:3000` | Public canonical URL (production: `https://rulexmc-website.vercel.app`), used for metadata, canonical/OG URLs, the sitemap and Stripe redirects |
 | `MC_SERVER_ADDRESS` | `rulexmc.mcsh.io` | `host` or `host:port`. **Empty string** = "Server address not configured" and no status checks |
-| `MC_VERSION_LABEL` | (empty) | e.g. `1.21 – 26.2`. Empty = the version string reported by live status |
+| `MC_VERSION_LABEL` | `1.9 – 26.2+` | Supported client range shown on the site. Empty = the verified default |
 | `STATUS_SOURCE` | `mcsrvstat` | or `ping` (direct SLP from the web server; needs outbound TCP to the MC port) |
 | `STATS_PROVIDER` | `database` | or `sample` (dev only, always badged) |
 | `INGEST_SECRET` | — | ≥ 32 chars. Ingest endpoints return 503 until it's set |
 | `PAYMENT_PROVIDER` | `none` | `tebex` or `stripe` |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | — | Server-side only |
-| `DISCORD_URL`, `YOUTUBE_URL`, `TIKTOK_URL`, `X_URL`, `VOTE_URL` | — | Footer links. Unset = hidden |
+| `DISCORD_URL` | official invite | Unset = `https://discord.com/invite/aBg5Wrp4U4`; empty string = hide Discord everywhere |
+| `YOUTUBE_URL`, `TIKTOK_URL`, `X_URL`, `VOTE_URL` | — | Footer links. Unset = hidden. `VOTE_URL` is added before the built-in vote pages |
 | `RATE_LIMIT_STORE` | `postgres` | `memory` = single-instance only |
 
 ## Production deployment
