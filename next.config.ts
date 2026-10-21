@@ -30,12 +30,20 @@ const nextConfig: NextConfig = {
   // Docker builds set NEXT_OUTPUT=standalone for a minimal runtime image; Vercel / `next start` use the default.
   output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   poweredByHeader: false,
+  // Always render <title>/meta tags in the initial <head> (no streamed metadata) so every crawler
+  // and link-preview bot sees them.
+  htmlLimitedBots: /.*/,
   serverExternalPackages: ["@node-rs/argon2"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "mc-heads.net" },
       { protocol: "https", hostname: "crafatar.com" },
     ],
+  },
+  async redirects() {
+    // Short, shareable link to the community Discord (override the target with DISCORD_URL).
+    const discord = process.env.DISCORD_URL?.trim() || "https://discord.com/invite/aBg5Wrp4U4";
+    return /^https:\/\//.test(discord) ? [{ source: "/discord", destination: discord, permanent: false }] : [];
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

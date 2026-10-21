@@ -4,5 +4,10 @@ import type { MetadataRoute } from "next";
 import { getConfig } from "@/lib/config";
 
 export default function robots(): MetadataRoute.Robots {
-  return { rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/portal", "/api/"] }], sitemap: `${getConfig().siteUrl.replace(/\/$/, "")}/sitemap.xml` };
+  const base = getConfig().siteUrl.replace(/\/$/, "");
+  return {
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/portal", "/api/"] }],
+    sitemap: `${base}/sitemap.xml`,
+    host: base,
+  };
 }
