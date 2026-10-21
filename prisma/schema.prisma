@@ -132,6 +132,8 @@ model StoreListing {
   highlight     Boolean     @default(false)
   active        Boolean     @default(true)
   sortOrder     Int         @default(0)
+  /// Example/placeholder listing: shown with an "Example" badge so visitors never mistake it for a real package.
+  isExample     Boolean     @default(false)
   /// Tebex package checkout URL (used when PAYMENT_PROVIDER=tebex)
   tebexUrl      String?
   /// Stripe Price ID (used when PAYMENT_PROVIDER=stripe)

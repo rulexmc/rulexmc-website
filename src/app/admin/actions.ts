@@ -109,6 +109,7 @@ export async function saveListing(form: FormData) {
     features: String(form.get("features") ?? "").split("\n").map((s) => s.trim()).filter(Boolean),
     highlight: bool(form, "highlight"),
     active: bool(form, "active"),
+    isExample: bool(form, "isExample"),
     sortOrder: form.get("sortOrder") ?? 0,
     tebexUrl: form.get("tebexUrl") || undefined,
     stripePriceId: form.get("stripePriceId") || undefined,

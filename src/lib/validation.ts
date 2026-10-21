@@ -69,6 +69,7 @@ export const storeListingSchema = z.object({
   features: z.array(z.string().trim().min(1).max(80)).max(30),
   highlight: z.boolean(),
   active: z.boolean(),
+  isExample: z.boolean().default(false),
   sortOrder: z.coerce.number().int().min(-1000).max(1000),
   tebexUrl: optionalHttps,
   stripePriceId: z

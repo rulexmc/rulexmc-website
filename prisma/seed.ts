@@ -25,7 +25,7 @@ const LISTINGS: Array<{
   },
   {
     slug: "legend", name: "Legend", kind: "RANK", sortOrder: 3, priceCents: 1999,
-    tagline: "The ultimate RuleXMC rank",
+    tagline: "The ultimate RuleX MC rank",
     description: "Every perk, maximum flex. Still no hearts for sale — earn them.",
     features: ["Coloured chat prefix", "2 extra homes", "VIP kit (weekly)", "/hat", "MVP kit (weekly)", "/craft & /enderchest", "Particle trail", "Legend kit (weekly)", "Priority queue", "/nick"],
   },
@@ -43,7 +43,7 @@ async function main() {
   const listingCount = await prisma.storeListing.count();
   if (listingCount === 0) {
     for (const l of LISTINGS) {
-      await prisma.storeListing.create({ data: { ...l, currency: process.env.STORE_CURRENCY || "USD", highlight: l.highlight ?? false } });
+      await prisma.storeListing.create({ data: { ...l, currency: process.env.STORE_CURRENCY || "USD", highlight: l.highlight ?? false, isExample: true } });
     }
     console.log(`Seeded ${LISTINGS.length} example store listings.`);
   } else {
@@ -54,8 +54,8 @@ async function main() {
   if (annCount === 0) {
     await prisma.announcement.create({
       data: {
-        title: "Welcome to the new RuleXMC website",
-        body: "Create an account, link your Minecraft name and climb the leaderboards. Edit or remove this post in the admin dashboard.",
+        title: "Welcome to the new RuleX MC website",
+        body: "Create an account, link your Minecraft name and climb the leaderboards. Join our Discord for the latest news.",
         pinned: true,
       },
     });

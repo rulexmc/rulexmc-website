@@ -34,6 +34,7 @@ function ListingFields({ l }: { l?: StoreListing }) {
       <div className="flex gap-6 text-sm">
         <label className="flex items-center gap-2"><input type="checkbox" name="active" defaultChecked={l?.active ?? true} className="accent-blood-500" /> Active</label>
         <label className="flex items-center gap-2"><input type="checkbox" name="highlight" defaultChecked={l?.highlight ?? false} className="accent-blood-500" /> Highlight</label>
+        <label className="flex items-center gap-2"><input type="checkbox" name="isExample" defaultChecked={l?.isExample ?? false} className="accent-blood-500" /> Example (badged as sample)</label>
       </div>
     </>
   );
@@ -53,7 +54,7 @@ export default async function AdminStore({ searchParams }: { searchParams: Flash
             <details>
               <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2">
                 <span className="font-hud text-lg font-bold text-white">{l.name} <span className="text-sm font-normal text-bone-400">· {l.kind} · {formatPrice(l.priceCents, l.currency)}</span></span>
-                <span className="text-xs text-bone-400">{l.active ? "active" : "hidden"}{l.tebexUrl ? " · tebex" : ""}{l.stripePriceId ? " · stripe" : ""}</span>
+                <span className="text-xs text-bone-400">{l.active ? "active" : "hidden"}{l.isExample ? " · example" : ""}{l.tebexUrl ? " · tebex" : ""}{l.stripePriceId ? " · stripe" : ""}</span>
               </summary>
               <form action={saveListing} className="mt-4 space-y-3"><ListingFields l={l} /><SubmitButton className="btn-red btn-sm">Save</SubmitButton></form>
               <form action={deleteListing} className="mt-3"><input type="hidden" name="id" value={l.id} /><button type="submit" className="text-sm text-blood-300 underline hover:text-white">Delete listing</button></form>
