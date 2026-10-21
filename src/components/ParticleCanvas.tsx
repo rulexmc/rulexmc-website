@@ -46,8 +46,8 @@ export function ParticleCanvas() {
         p.tw += 0.03;
         if (p.y < -10) Object.assign(p, spawn(false));
         const alpha = p.a * (0.6 + 0.4 * Math.sin(p.tw));
-        ctx.fillStyle = `rgba(239, 28, 43, ${alpha})`;
-        ctx.shadowColor = "rgba(239, 28, 43, 0.8)";
+        ctx.fillStyle = `rgba(208, 18, 41, ${alpha})`;
+        ctx.shadowColor = "rgba(208, 18, 41, 0.8)";
         ctx.shadowBlur = 8;
         ctx.fillRect(p.x, p.y, p.s, p.s);
       }

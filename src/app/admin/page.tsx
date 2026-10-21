@@ -70,11 +70,11 @@ export default async function AdminOverview({ searchParams }: { searchParams: Fl
         <h2 className="font-hud text-lg font-bold uppercase tracking-wider text-white">Integrations</h2>
         <ul className="mt-3 divide-y divide-white/5">
           {integrations.map((i) => (
-            <li key={i.name} className="flex items-center justify-between gap-4 py-2.5 text-sm">
+            <li key={i.name} className="flex flex-col gap-1.5 py-2.5 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <span className="text-bone-200">{i.name}</span>
-              <span className="flex items-center gap-3 text-right text-bone-400">
+              <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-bone-400 sm:justify-end sm:text-right">
                 {i.detail}
-                <span className={`badge border ${i.ok ? "border-emerald-400/40 text-emerald-300" : "border-amber-400/40 text-amber-200"}`}>{i.ok ? "Configured" : "Not configured"}</span>
+                <span className={`badge shrink-0 whitespace-nowrap border ${i.ok ? "border-emerald-400/40 text-emerald-300" : "border-amber-400/40 text-amber-200"}`}>{i.ok ? "Configured" : "Not configured"}</span>
               </span>
             </li>
           ))}

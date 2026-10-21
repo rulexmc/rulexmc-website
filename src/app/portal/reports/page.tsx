@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { ReportForm } from "@/components/PortalForms";
 
-export const metadata: Metadata = { title: "Report a player" };
+export const metadata: Metadata = { title: "Report a player", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 const STATUS_STYLE: Record<string, string> = {

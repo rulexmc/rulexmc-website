@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
 
 const LINKS = [
   ["/admin", "Overview"], ["/admin/announcements", "Announcements"], ["/admin/content", "Content"],
@@ -11,7 +13,7 @@ const LINKS = [
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <div className="container-x py-10">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">Admin</p>

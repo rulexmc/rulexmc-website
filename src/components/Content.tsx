@@ -13,7 +13,7 @@ export function Content({ body, faq = false }: { body: string; faq?: boolean }) 
             <ul key={i} className="space-y-2">
               {n.items.map((it, j) => (
                 <li key={j} className="flex gap-3">
-                  <span className="mt-2 h-2 w-2 shrink-0 bg-blood-500 shadow-[0_0_8px_rgba(239,28,43,0.8)]" aria-hidden />
+                  <span className="mt-2 h-2 w-2 shrink-0 bg-blood-500 shadow-[0_0_8px_rgba(208,18,41,0.8)]" aria-hidden />
                   <span>{it}</span>
                 </li>
               ))}

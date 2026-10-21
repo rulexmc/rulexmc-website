@@ -1,14 +1,28 @@
 "use client";
 
+/** Last-resort boundary (root layout failed), so it can't rely on Tailwind or fonts. */
 export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
   return (
     <html lang="en">
-      <body style={{ background: "#050405", color: "#f4eeee", fontFamily: "system-ui, sans-serif", display: "grid", placeItems: "center", minHeight: "100vh", margin: 0 }}>
-        <div style={{ textAlign: "center" }}>
-          <h1>RuleXMC is having trouble</h1>
-          <p>Please try again in a moment.</p>
-          <button type="button" onClick={reset} style={{ background: "#ef1c2b", color: "#fff", border: 0, padding: "10px 18px", borderRadius: 6, cursor: "pointer" }}>Try again</button>
-        </div>
+      <body
+        style={{
+          margin: 0, minHeight: "100vh", display: "grid", placeItems: "center", padding: 24,
+          background: "radial-gradient(800px 400px at 50% 0%, rgba(165,12,31,0.35), transparent 70%), #040304",
+          color: "#f5efef", fontFamily: "system-ui, -apple-system, Segoe UI, sans-serif",
+        }}
+      >
+        <main style={{ textAlign: "center", maxWidth: 440 }}>
+          <p style={{ letterSpacing: "0.3em", textTransform: "uppercase", fontSize: 12, color: "#f0414f", margin: 0 }}>RuleX MC</p>
+          <h1 style={{ fontSize: 28, margin: "12px 0" }}>We&apos;re having trouble</h1>
+          <p style={{ color: "#c8bdbe", lineHeight: 1.6 }}>Please try again in a moment.</p>
+          <button
+            type="button"
+            onClick={reset}
+            style={{ marginTop: 16, background: "linear-gradient(#d01229, #720816)", color: "#fff", border: "1px solid rgba(240,65,79,0.5)", padding: "12px 22px", borderRadius: 8, cursor: "pointer", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}
+          >
+            Try again
+          </button>
+        </main>
       </body>
     </html>
   );

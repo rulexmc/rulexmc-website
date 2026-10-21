@@ -1,6 +1,6 @@
 /** Decorative Minecraft-style block strip (pure CSS/SVG, procedurally shaded). */
 export function BlockStrip({ className = "" }: { className?: string }) {
-  const shades = ["#1a1112", "#231617", "#2c1a1c", "#3a0409", "#140e0f", "#8f0b17", "#1f1415"];
+  const shades = ["#1a1112", "#231617", "#2c1a1c", "#3a0409", "#140e0f", "#720816", "#1f1415"];
   return (
     <svg className={`h-4 w-full ${className}`} viewBox="0 0 64 2" preserveAspectRatio="none" shapeRendering="crispEdges" aria-hidden>
       {Array.from({ length: 128 }, (_, i) => {

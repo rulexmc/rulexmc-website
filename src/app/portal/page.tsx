@@ -9,7 +9,7 @@ import { SampleBadge } from "@/components/SampleBadge";
 import { unlinkUsernameAction } from "./actions";
 import Image from "next/image";
 
-export const metadata: Metadata = { title: "Player portal" };
+export const metadata: Metadata = { title: "Player portal", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 function IntegrationNote({ children }: { children: React.ReactNode }) {
@@ -37,8 +37,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   if (stats) for (const m of METRICS) ranks[m] = await provider.getRank(stats.uuid, m).catch(() => null);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-      {sp.welcome ? <div className="mb-6 rounded-md border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100" role="status">Welcome to RuleXMC, {user.displayName}! Link your Minecraft username below.</div> : null}
+    <div className="container-x py-14">
+      {sp.welcome ? <div className="mb-6 rounded-md border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100" role="status">Welcome to RuleX MC, {user.displayName}! Link your Minecraft username below.</div> : null}
       {sp.denied ? <div className="mb-6 rounded-md border border-blood-500/50 bg-blood-900/40 px-4 py-3 text-sm text-blood-200" role="alert">You don&apos;t have access to that page.</div> : null}
 
       <header className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -55,7 +55,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
           <h2 id="mc" className="font-hud text-xl font-bold uppercase tracking-wider text-white">Minecraft account</h2>
           <div className="mt-5 flex items-center gap-5">
             {user.mcUsername ? (
-              <Image src={bodyUrl(user.mcUsername, 160)} alt={`${user.mcUsername}'s skin`} width={80} height={160} unoptimized className="[image-rendering:pixelated] drop-shadow-[0_0_20px_rgba(239,28,43,0.35)]" />
+              <Image src={bodyUrl(user.mcUsername, 160)} alt={`${user.mcUsername}'s skin`} width={80} height={160} unoptimized className="[image-rendering:pixelated] drop-shadow-[0_0_20px_rgba(208,18,41,0.35)]" />
             ) : (
               <div className="flex h-40 w-20 items-center justify-center rounded border border-dashed border-white/15 text-xs text-bone-400">No skin</div>
             )}
@@ -82,7 +82,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                 <div className="mt-3">
                   <p className="text-sm text-bone-300">Join the server as <strong className="text-white">{user.mcUsername}</strong> and type:</p>
                   <code className="mt-2 block rounded border border-blood-500/40 bg-ink-900 px-3 py-2 font-hud text-lg font-bold tracking-widest text-blood-300">/verify {code.code}</code>
-                  <p className="mt-1 text-xs text-bone-400">Expires {code.expiresAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}.</p>
+                  <p className="mt-1 text-xs text-bone-400">Expires {code.expiresAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata", timeZoneName: "short" })}.</p>
                 </div>
               ) : null}
               <div className="mt-3"><LinkCodeForm /></div>
@@ -139,7 +139,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                 <li key={a.id} className="flex items-center justify-between gap-4 py-2.5 text-sm">
                   <span className="text-bone-200">{a.message}</span>
                   <time className="shrink-0 text-xs text-bone-400" dateTime={a.createdAt.toISOString()}>
-                    {a.createdAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    {a.createdAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata", timeZoneName: "short" })}
                   </time>
                 </li>
               ))}

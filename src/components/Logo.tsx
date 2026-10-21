@@ -1,4 +1,4 @@
-/** RuleXMC wordmark: a pixel-block heart split by a crimson "X" slash. Pure SVG, no external assets. */
+/** RuleX MC wordmark: a pixel-block heart split by a crimson "X" slash. Pure SVG, no external assets. */
 const HEART = [
   "0110110",
   "1111111",
@@ -15,7 +15,7 @@ export function PixelHeart({ className = "", title }: { className?: string; titl
       {HEART.flatMap((row, y) =>
         row.split("").map((c, x) =>
           c === "1" ? (
-            <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={(x + y) % 3 === 0 ? "#ff4d57" : y > 3 ? "#8f0b17" : "#ef1c2b"} />
+            <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={(x + y) % 3 === 0 ? "#f0414f" : y > 3 ? "#720816" : "#d01229"} />
           ) : null,
         ),
       )}
@@ -25,12 +25,12 @@ export function PixelHeart({ className = "", title }: { className?: string; titl
 }
 
 export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const text = size === "lg" ? "text-[2.6rem] sm:text-7xl" : size === "sm" ? "text-lg" : "text-xl sm:text-2xl";
-  const heart = size === "lg" ? "h-10 w-12 sm:h-20 sm:w-24" : size === "sm" ? "h-5 w-6" : "h-6 w-7";
+  const text = size === "lg" ? "text-[1.85rem] min-[400px]:text-[2.4rem] sm:text-6xl lg:text-7xl" : size === "sm" ? "text-lg" : "text-xl sm:text-2xl";
+  const heart = size === "lg" ? "h-8 w-10 min-[400px]:h-10 min-[400px]:w-12 sm:h-16 sm:w-20 lg:h-20 lg:w-24" : size === "sm" ? "h-5 w-6" : "h-6 w-7";
   return (
-    <span className="inline-flex items-center gap-2.5" aria-label="RuleXMC">
+    <span className="inline-flex items-center gap-2.5" role="img" aria-label="RuleX MC">
       <span className="relative inline-flex">
-        <PixelHeart className={`${heart} drop-shadow-[0_0_10px_rgba(239,28,43,0.7)]`} />
+        <PixelHeart className={`${heart} drop-shadow-[0_0_12px_rgba(208,18,41,0.75)]`} />
       </span>
       <span className={`whitespace-nowrap font-display font-black uppercase leading-none tracking-wider ${text}`} aria-hidden>
         <span className="text-bone-100">Rule</span>
@@ -38,7 +38,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
           X
           <span className="absolute -inset-x-1 top-1/2 h-[0.08em] -translate-y-1/2 -rotate-[28deg] bg-blood-400/80" />
         </span>
-        <span className="text-bone-100">MC</span>
+        <span className="ml-[0.28em] text-bone-100">MC</span>
       </span>
     </span>
   );
