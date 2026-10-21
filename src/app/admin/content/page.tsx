@@ -15,7 +15,7 @@ export default async function AdminContent({ searchParams }: { searchParams: Fla
     <div>
       <AdminFlash {...sp} />
       <p className="mb-6 text-sm text-bone-400">
-        Formatting: blank line = new paragraph, lines starting with <code>- </code> become a list, lines starting with <code>## </code> become FAQ questions. HTML is not rendered.
+        Formatting: blank line = new paragraph, lines starting with <code>- </code> become a list, lines starting with <code>## </code> become FAQ questions. HTML is not rendered. <code>server.faq</code> and <code>server.join</code> are optional extras: they only appear on the Server page once you save some text.
       </p>
       <div className="space-y-4">
         {keys.map((key) => {

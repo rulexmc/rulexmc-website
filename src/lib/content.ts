@@ -3,41 +3,41 @@ import { prisma } from "@/lib/db";
 /** Default copy, used when a block has not been created/edited in the admin dashboard yet. */
 export const DEFAULT_BLOCKS: Record<string, { title: string; body: string }> = {
   "home.about": {
-    title: "What is Lifesteal?",
+    title: "One network. Three ways to play.",
     body:
-      "Every player starts with 10 hearts. Kill another player and you steal one of their hearts. Die to a player and you lose one. Lose them all and you're eliminated until someone revives you.\n\nRuleXMC is a competitive Lifesteal SMP built for fair PvP, real economies and seasons that matter.",
+      "RuleX MC (the RuleX Network) is a crossplay Minecraft network for Java and Bedrock players, run by UHD Gaming and hosted in the India / Singapore region.\n\nSpawn into the hub, pick a portal and drop into Lifesteal, Survival or PvP Practice. Earn custom Aurora XP as you play and level up your profile.",
   },
   "server.lifesteal": {
     title: "How Lifesteal works",
     body:
-      "- You start with 10 hearts.\n- Killing a player steals one heart from them and gives it to you.\n- Dying to a player costs you one heart. Natural deaths may also cost hearts depending on season rules.\n- Hearts can be withdrawn as items and traded or used to revive eliminated players.\n- There is a maximum heart cap so nobody becomes unkillable.\n- Reach 0 hearts and you are eliminated until revived.",
+      "Lifesteal is the flagship RuleX MC realm: a high-stakes SMP where hearts are everything.\n\n- Kill another player and you steal one of their hearts.\n- Die to a player and they take one of yours.\n- Lose all your hearts and you face the consequences.\n- The world is 20,000 × 20,000 blocks, so there is room to build, hide and hunt.",
   },
   "server.rules": {
     title: "Server rules",
     body:
-      "- No hacked clients, x-ray, macros or unfair mods.\n- No exploiting bugs or duplication glitches — report them instead.\n- No combat logging. Logging out during combat counts as a death.\n- No hate speech, harassment or doxxing.\n- No real-money trading outside the official store.\n- Respect staff decisions; appeal through the proper channel.",
+      "The full RuleX MC rulebook will be published on this page. Until then, play fair, respect other players, and ask the team on Discord if you are unsure whether something is allowed.",
   },
   "server.faq": {
-    title: "FAQ",
-    body:
-      "## Which Minecraft edition do I need?\nJava Edition. Check the version shown on this page for the supported range.\n\n## How do I get hearts back?\nKill players, craft heart items (if enabled this season) or trade with other players.\n\n## What happens when I reach 0 hearts?\nYou are eliminated. A teammate can revive you with a revive item.\n\n## Is combat logging allowed?\nNo. Leaving during combat counts as a death and costs a heart.\n\n## How do I report a cheater?\nCreate an account on this website, open the Player Portal and submit a report with evidence.",
+    title: "More questions",
+    body: "",
   },
   "server.join": {
-    title: "How to join",
-    body:
-      "- Open Minecraft: Java Edition and click Multiplayer.\n- Click Add Server and paste the server address shown above.\n- Click Done, then join. Use /spawn and the in-game guide to get started.",
+    title: "Good to know",
+    body: "",
   },
   "store.shop": {
-    title: "In-game shop",
-    body: "Use /shop in-game to buy and sell blocks, food and combat gear with your in-game balance. Prices are set by the server economy.",
+    title: "In-game economy",
+    body:
+      "Survival has a player-driven economy. Your balance is shown on the in-game HUD scoreboard, and the richest players appear on the leaderboards.",
   },
   "store.auction": {
-    title: "Auction house",
-    body: "Use /ah to list items for other players and bid on rare gear. Listings expire automatically; unsold items are returned to you.",
+    title: "Questions?",
+    body: "Questions about ranks, the store or your account? Ask the team on the RuleX MC Discord.",
   },
   "store.kits": {
-    title: "Kits & perks",
-    body: "- Every player gets starter kits with /kit.\n- Ranks unlock additional kits with shorter cooldowns.\n- Perks are cosmetic or convenience items and never sell hearts directly.",
+    title: "Store status",
+    body:
+      "The store is not open yet. Packages shown on this page are examples only and cannot be bought. Official packages and prices will be announced on Discord when the store launches.",
   },
 };
 
@@ -48,6 +48,16 @@ export async function getBlock(key: string): Promise<{ title: string; body: stri
     return b ? { title: b.title, body: b.body } : fallback;
   } catch {
     return fallback;
+  }
+}
+
+/** Only the block an admin actually saved (null when it has never been edited or the DB is unreachable). */
+export async function getStoredBlock(key: string): Promise<{ title: string; body: string } | null> {
+  try {
+    const b = await prisma.contentBlock.findUnique({ where: { key } });
+    return b && b.body.trim() ? { title: b.title, body: b.body } : null;
+  } catch {
+    return null;
   }
 }
 

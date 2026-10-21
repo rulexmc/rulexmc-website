@@ -40,6 +40,23 @@ describe("getConfig", () => {
     expect(c.youtube).toBeNull();
     expect(c.x).toBeNull();
   });
+  it("uses the verified Discord invite when DISCORD_URL is unset, and hides it when empty", () => {
+    delete process.env.DISCORD_URL;
+    expect(getConfig().community.discord).toBe("https://discord.com/invite/aBg5Wrp4U4");
+    process.env.DISCORD_URL = "";
+    expect(getConfig().community.discord).toBeNull();
+  });
+  it("resolves the site URL from SITE_URL, then Vercel's production domain", () => {
+    delete process.env.SITE_URL;
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = "rulexmc-website.vercel.app";
+    expect(getConfig().siteUrl).toBe("https://rulexmc-website.vercel.app");
+    process.env.SITE_URL = "https://example.com";
+    expect(getConfig().siteUrl).toBe("https://example.com/");
+  });
+  it("defaults the version label to the supported range", () => {
+    delete process.env.MC_VERSION_LABEL;
+    expect(getConfig().server.versionLabel).toBe("1.9 – 26.2+");
+  });
   it("falls back to safe provider defaults", () => {
     process.env.PAYMENT_PROVIDER = "paypal";
     process.env.STATS_PROVIDER = "whatever";
