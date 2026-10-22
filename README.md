@@ -45,13 +45,15 @@ Runtime dependencies: `next`, `react`, `react-dom`, `@prisma/client`, `@node-rs/
 - **Home**: "YOUR HEART. YOUR SURVIVAL." hero, copy-to-clipboard server IP (with fallback), live status chip and player count, PLAY NOW / LEADERBOARDS / STORE, realm cards (Lifesteal / Survival / PvP Practice), network features, Java + Bedrock join guide, top-5 kills teaser, latest announcements, Discord call-to-action (real member/online counts from Discord's public invite API, hidden on failure), vote links, FAQ preview.
 - **Server** (`/server`): connection & compatibility facts (Java IP, Bedrock IP + port 19132, versions, Paper 26.2, cracked + premium via AuthMe, region, owner), live status, live MOTD (or the official MOTD when the lookup fails), step-by-step join guide for both editions, realm details, Lifesteal mechanics, rules block, network features and a full FAQ (with FAQPage JSON-LD). The Lifesteal / rules blocks, plus optional `server.join` / `server.faq` extras, are editable in the admin dashboard.
 - **`/discord`**: short redirect to the Discord invite.
-- **Leaderboards** (`/leaderboards`): kills, deaths, balance and playtime. Ascending/descending sort, pagination, name search, and mc-heads.net avatars. The data comes from a `StatsProvider`. Sample data always carries a **"SAMPLE DATA — NOT LIVE"** badge and a notice.
-- **Store** (`/store`): "store not open yet" notice, rank cards, an auto-generated feature comparison table, kits and perks, and info blocks. Listings flagged **Example** (`isExample`, toggle in `/admin/store`; the seeded ones are examples) carry an "Example" badge and "example price" label. Purchase buttons go through the payment abstraction. When nothing is configured they're disabled and read **"Payments not configured"**.
+- **Leaderboards** (`/leaderboards`): tabs for kills, hearts, playtime, balance, level and deaths; top-3 podium, totals, ascending/descending order, numbered pagination, and a debounced name search that updates the URL (it also works as a plain GET form without JavaScript). Hearts, balance and level are optional: a board only ranks players whose server reported that value, and shows an honest empty state otherwise. Rows link to player profiles. The data comes from a `StatsProvider`. Sample data always carries a **"SAMPLE DATA — NOT LIVE"** badge and a notice.
+- **Player profiles** (`/player/<name>`): skin render, every reported stat with its rank on that board, K/D, last seen and last sync time, a **Verified** badge when a site account proved ownership in-game, and Live/Sample labelling. Unknown or invalid names return a real **404**; other capitalisations 308-redirect to the canonical name. A verified player the server hasn't reported yet gets an empty state instead of invented numbers. Live profiles carry ProfilePage JSON-LD and the top 100 are listed in the sitemap; sample profiles are `noindex`.
+- **Store** (`/store`): "store not open yet" notice, a featured-package spotlight, category navigation (ranks / kits / perks) with a section per category, rank cards whose feature lists show "Everything in VIP, plus:" only when the lower tier really is included, an auto-generated comparison table with prices, and info blocks. Listings flagged **Example** (`isExample`, toggle in `/admin/store`; the seeded ones are examples) carry an "Example" badge and "example price" label. Purchase buttons go through the payment abstraction. When nothing is configured they're disabled and read **"Payments not configured"**.
 - **Player portal** (`/portal`): register, log in, link a Minecraft username, verify ownership with an in-game code, skin render, stats with leaderboard rank, K/D, hearts, balance and playtime (when reported), recent activity, and player reports (`/portal/reports`).
 - **Admin** (`/admin`, ADMIN only, checked on the server in the layout, every page and every action): overview (live status, stats summary, integration checklist, recent accounts with promote/demote), CRUD for announcements, editable content blocks, a report review queue, store listings, and a paginated **audit log**. There's deliberately **no console, RCON or server power control**.
 - **Status**: fetched on the server from mcsrvstat.us (Next data cache, 60 s) or a built-in Java **Server List Ping** (`STATUS_SOURCE=ping`, cached in memory). The client refreshes `/api/status` every 60 s. On failure it shows **"Status unavailable"**. It never shows hardcoded numbers.
-- **SEO & social**: per-page titles, descriptions and canonical URLs (`src/lib/seo.ts`), Open Graph + Twitter `summary_large_image` tags, a generated OG image (`src/app/opengraph-image.tsx`), SVG favicon + generated Apple touch icon, web manifest, Organization/WebSite JSON-LD, `robots.txt` and `sitemap.xml`. Metadata is always rendered in the initial `<head>` (`htmlLimitedBots`).
-- **Quality**: mobile menu with focus trap, Esc to close and scroll lock, active-page nav state, loading skeletons, error and global-error boundaries, a custom 404, empty states, `prefers-reduced-motion` support (particles off, no animation), a skip link, labelled fields with `aria-invalid`, security headers, rate limits, `robots.txt` and `sitemap.xml`.
+- **SEO & social**: per-page titles, descriptions and canonical URLs (`src/lib/seo.ts`), Open Graph + Twitter `summary_large_image` tags, a generated OG image (`src/app/opengraph-image.tsx`), SVG favicon + generated Apple touch icon, web manifest, JSON-LD (Organization, WebSite, BreadcrumbList on inner pages, VideoGame + GameServer on `/server` with status/players only when they're real, FAQPage, ProfilePage), visible breadcrumbs, `robots.txt` and `sitemap.xml`. Metadata is always rendered in the initial `<head>` (`htmlLimitedBots`).
+- **Motion**: hero entrance, CSS scroll-driven reveals (`animation-timeline: view()`, content is never hidden where unsupported), card hover lifts, button press, animated copy-IP feedback (check icon, ring flash, toast) and count-ups for **live** numbers only (players online, Discord counts, live leaderboard totals; never sample data). Everything animates `transform`/`opacity` only, reserves its space (no layout shift), and is switched off entirely under `prefers-reduced-motion` (no animations, no hover movement, particles off). The particle canvas starts when the browser is idle, caps at 30 fps and pauses off-screen.
+- **Quality**: mobile menu with focus trap, Esc to close and scroll lock, active-page nav state, loading skeletons for /, /server and /store, error and global-error boundaries, a custom 404 with player search, empty states, toasts in a single polite live region, inline login/register validation that mirrors the server-side zod rules (with a password show/hide toggle), a skip link, visible focus, focusable scroll regions, labelled fields with `aria-invalid`, security headers, rate limits.
 
 ## Folder structure
 
@@ -65,12 +67,14 @@ rulexmc-website/
 │  ├─ create-admin.ts          # create/promote the first ADMIN (args or env)
 │  ├─ sync-vanilla-stats.mjs   # example: vanilla world stats → POST /api/ingest/stats
 │  ├─ smoke.sh                 # HTTP smoke test against a running instance
-│  └─ e2e.mjs                  # optional Playwright browser flow
+│  ├─ e2e.mjs                  # optional Playwright browser flow
+│  └─ a11y.mjs                 # optional headless accessibility audit (axe-core, headings, focus)
 ├─ src/
 │  ├─ middleware.ts            # fast signed-out redirect for /portal & /admin (not the security boundary)
 │  ├─ app/
-│  │  ├─ page.tsx              # home
+│  │  ├─ (home)/page.tsx       # home (in a route group so its loading skeleton can't turn 404s into 200s)
 │  │  ├─ server/ leaderboards/ store/
+│  │  ├─ player/[name]/        # player profile (no loading.tsx on purpose: keeps real 404 status codes)
 │  │  ├─ (auth)/login, (auth)/register, (auth)/actions.ts
 │  │  ├─ portal/               # player portal + reports + server actions
 │  │  ├─ admin/                # dashboard pages + actions.ts (each action calls requireAdmin)
@@ -114,6 +118,8 @@ and set `DATABASE_URL="postgresql://rulexmc:dev@localhost:5432/rulexmc?schema=pu
 
 To preview the leaderboards without a game server, set `STATS_PROVIDER=sample`. The pages are then badged **SAMPLE DATA**.
 
+**Upgrading an existing database:** migration `20261022090000_player_stats_level` is additive only. It adds a nullable `PlayerStats.level` column plus indexes on `hearts` and `level`, and doesn't touch existing rows. `npm run db:deploy` (or Vercel's `vercel-build`) applies it. Never use `prisma migrate reset` or `db push --force-reset` against a database you care about.
+
 For local `next start` over plain http, set `INSECURE_COOKIES=1`. Otherwise production builds mark the session cookie `Secure`, and browsers drop it on http://localhost.
 
 ## Commands
@@ -130,6 +136,7 @@ For local `next start` over plain http, set `INSECURE_COOKIES=1`. Otherwise prod
 | `npm run admin:create -- --email … --password … [--name …] [--reset-password]` | Create or promote an admin |
 | `npm run stats:sync -- --server /path/to/mc [--world world] [--dry-run]` | Example vanilla stats sync |
 | `node scripts/e2e.mjs` | Optional browser test (needs `playwright-core` and Chrome; see the file header) |
+| `node scripts/a11y.mjs <base> [paths…]` | Optional accessibility audit at 360 and 1440 px (needs `playwright-core`, `axe-core` and Chrome) |
 
 ## Configuration (.env)
 
@@ -156,7 +163,7 @@ Every variable is documented in [`.env.example`](./.env.example). The main ones:
 
 1. Create a Postgres database (Neon, Supabase, Vercel Postgres, Railway…). If the provider offers a pooled URL (e.g. Neon `-pooler`), use it for `DATABASE_URL`.
 2. Import the repo into Vercel and add the env vars from `.env.example`. Set `SITE_URL=https://your-domain` and **don't** set `INSECURE_COOKIES`.
-3. Build command: `npx prisma migrate deploy && npm run build` (install runs `prisma generate` via `postinstall`).
+3. Build command: Vercel runs `npm run vercel-build` (`prisma migrate deploy && tsx prisma/seed.ts && tsx scripts/create-admin.ts && next build`); seed and create-admin are idempotent. Install runs `prisma generate` via `postinstall`. Elsewhere: `npx prisma migrate deploy && npm run build`.
 4. After the first deploy, run this once from your machine against the production DB:
    `DATABASE_URL=… npm run db:seed && DATABASE_URL=… npm run admin:create -- --email … --password …`
 5. Stripe only: add a webhook endpoint at `https://your-domain/api/webhooks/stripe` for the `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed` and `checkout.session.expired` events, then copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
@@ -190,7 +197,8 @@ What each feature needs on the **Minecraft (Paper) server side**. Everything els
 | Version shown | None. It's whatever the server reports in its ping. Override with `MC_VERSION_LABEL` (handy for ViaVersion-style "1.9–26.x" ranges). | — |
 | **Leaderboards: kills, deaths, playtime** | Push data to `POST /api/ingest/stats`. Two ways: **(a)** the bundled `scripts/sync-vanilla-stats.mjs`, run by cron on the MC host. It reads vanilla stat files, `world/stats/*.json` (or `world/players/stats/*.json` on newer layouts) plus `usercache.json`, giving `player_kills`, `deaths` and `play_time`. **(b)** A small plugin or Skript that POSTs on quit and every few minutes. | Empty state: "No stats yet" |
 | **Balance** | Needs an economy plugin. Vanilla has no money. **Vault** (or VaultUnlocked) plus an economy provider such as **EssentialsX Economy**. Read `Economy#getBalance(player)` in a plugin, or the `%vault_eco_balance%` placeholder via **PlaceholderAPI**, and send `balance`. | Shows "—"; the balance board lists only players with a reported balance |
-| **Hearts** | A Lifesteal plugin, e.g. **LifeStealZ** (it exposes PlaceholderAPI placeholders and an API; check the plugin docs for the exact placeholder name). Send `hearts` (integer). | Hearts are hidden |
+| **Hearts** | A Lifesteal plugin, e.g. **LifeStealZ** (it exposes PlaceholderAPI placeholders and an API; check the plugin docs for the exact placeholder name). Send `hearts` (integer). | Hearts are hidden; the hearts board shows an empty state |
+| **Level** | The **Aurora XP** level (or whichever level system you use). Send `level` (integer 0–1,000,000, or `null` to clear). Check your plugin's docs for its PlaceholderAPI placeholder. | Shows "—"; the level board shows an empty state |
 | Kills/deaths from a plugin | Optional. If you'd rather use a stats plugin (e.g. LifeStealZ kill counters, PlaceholderAPI `%statistic_player_kills%` / `%statistic_deaths%` from the Statistic expansion, or Plan), send those instead of vanilla values. Fields are merged individually, so different sources can send different fields. | — |
 | **Account ownership verification** | A `/verify <code>` command (plugin, Skript or command handler) that POSTs `{code, name, uuid}` to `/api/ingest/verify` with the shared secret, then shows the returned `message` to the player. | Usernames can be linked but stay **"Unverified"** |
 | **Payments: Tebex** | A Tebex webstore with packages. Paste each package's checkout URL into the listing (`/admin/store`) and set `PAYMENT_PROVIDER=tebex`. **Delivery is handled by the Tebex plugin** on the server. | Buttons disabled: "Payments not configured" |
@@ -198,7 +206,7 @@ What each feature needs on the **Minecraft (Paper) server side**. Everything els
 | Announcements, content, store listings, reports | None (website DB) | — |
 | Shop / auction house info | None. These are text blocks describing your in-game `/shop` and `/ah` plugins (e.g. a GUI shop and an AuctionHouse plugin); edit them in the admin dashboard. | — |
 
-**PlaceholderAPI tip:** a single small plugin that resolves a list of placeholders for each online player and POSTs them is the most flexible approach. Map placeholders to the `kills`, `deaths`, `balance`, `playtimeSeconds` and `hearts` fields.
+**PlaceholderAPI tip:** a single small plugin that resolves a list of placeholders for each online player and POSTs them is the most flexible approach. Map placeholders to the `kills`, `deaths`, `balance`, `playtimeSeconds`, `hearts` and `level` fields.
 
 ## Ingest API reference
 
@@ -211,7 +219,7 @@ curl -X POST "$SITE_URL/api/ingest/stats" \
   -H "Authorization: Bearer $INGEST_SECRET" -H "Content-Type: application/json" \
   -d '{"source":"lifesteal-plugin","players":[
         {"uuid":"069a79f4-44e9-4726-a5be-fca90e38aaf5","name":"Notch",
-         "kills":12,"deaths":3,"playtimeSeconds":86400,"balance":1520.75,"hearts":13,
+         "kills":12,"deaths":3,"playtimeSeconds":86400,"balance":1520.75,"hearts":13,"level":42,
          "lastSeen":"2026-10-20T10:00:00+05:30"}]}'
 # → {"ok":true,"upserted":1}     422 on validation errors (details in "issues")
 ```
@@ -240,16 +248,17 @@ Automated:
 
 - [x] `npm run typecheck`: no errors
 - [x] `npm run lint`: no warnings
-- [x] `npm test`: 56 unit tests (config/address parsing, SLP VarInt and a real TCP ping against a fake server, mcsrvstat mapping, rate limiter, zod schemas including open-redirect and https-only checks, sample provider sort/search/pagination, payment state, Stripe signature verification, content parser, tokens, argon2)
+- [x] `npm test`: 95 unit tests (config/address parsing, SLP VarInt and a real TCP ping against a fake server, mcsrvstat mapping, rate limiter, zod schemas including open-redirect and https-only checks and the `level` field, sample provider sort/search/pagination per metric, metric formatting, leaderboard URL params and pagination window, store tier features, client form rules kept in parity with the zod schemas, JSON-LD builders, payment state, Stripe signature verification, content parser, tokens, argon2)
 - [x] `npm run build`
-- [x] `BASE_URL=… INGEST_SECRET=… npm run smoke`: 31 HTTP checks (pages, 404, auth redirects, headers, status, health, ingest auth/validation/upsert, leaderboard shows ingested data, checkout origin check)
-- [x] `node scripts/e2e.mjs`: browser flow (copy button and clipboard, register validation, link and verify via the ingest API, report, player denied /admin, admin login with a wrong and then a correct password, announcement shows on home, report resolved, audit entries, no console errors)
+- [x] `BASE_URL=… INGEST_SECRET=… npm run smoke`: 46 HTTP checks (pages incl. every board, OG image, 404s for unknown routes/players, `/discord` redirect, sitemap/robots/JSON-LD, auth redirects, headers, status, health body, ingest auth/validation/upsert incl. `level`, level board excludes unreported players, profile content and canonical 308, checkout origin check)
+- [x] `node scripts/e2e.mjs`: 34 browser checks (skip link, copy button state/toast/focus and clipboard, register validation, link and verify via the ingest API, verified profile before and after stats, unknown player 404, leaderboard tab/search/row click, report, player denied /admin, admin login with a wrong and then a correct password, announcement shows on home, report resolved, audit entries, no console errors)
+- [x] `node scripts/a11y.mjs`: axe-core WCAG 2.1 A/AA + best practices, one `<h1>` and no skipped heading levels, skip link first, visible focus on the first 60 Tab stops, at 360 and 1440 px
 
 Manual before launch:
 
 - [ ] Status shows Online and a player count with your real address; set `MC_SERVER_ADDRESS=""` and confirm "Server address not configured"
 - [ ] Mobile menu opens and closes (Esc works too); the layout holds at 360 px wide
-- [ ] With "reduce motion" turned on in the OS, particles and animations stop
+- [ ] With "reduce motion" turned on in the OS, particles and animations stop (automated check: zero running animations under `reducedMotion: reduce`)
 - [ ] Copy IP works on iOS Safari and Android Chrome
 - [ ] Store shows "Payments not configured" with `PAYMENT_PROVIDER=none`; with Tebex links set, the buttons open Tebex
 - [ ] Stripe test mode: checkout redirect → webhook marks the purchase PAID → it appears in `GET /api/ingest/purchases`
