@@ -3,6 +3,7 @@ import { Inter, Orbitron, Rajdhani } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Toaster } from "@/components/Toaster";
 import { getConfig } from "@/lib/config";
 import { SITE } from "@/lib/site";
 import { OG_IMAGE } from "@/lib/seo";
@@ -52,8 +53,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <Header />
-        <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">{children}</main>
+        {/* min-height keeps the footer below the fold while streamed page content arrives (prevents layout shift). */}
+        <main id="main" tabIndex={-1} className="min-h-[calc(100svh-4rem)] flex-1 focus:outline-none">{children}</main>
         <Footer />
+        <Toaster />
       </body>
     </html>
   );

@@ -31,6 +31,11 @@
   --animate-rise: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-drift: drift 18s ease-in-out infinite alternate;
   --animate-shine: shine 3.2s ease-in-out infinite;
+  --animate-pop: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  /* Motion tokens */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   @keyframes pulse-red {
     0%, 100% { box-shadow: 0 0 0 0 rgb(208 18 41 / 0.55), 0 10px 30px -8px rgb(208 18 41 / 0.7); }
@@ -43,6 +48,10 @@
   @keyframes drift {
     from { transform: translate3d(-4%, -2%, 0) scale(1); }
     to { transform: translate3d(4%, 3%, 0) scale(1.08); }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: none; opacity: 1; }
   }
   @keyframes shine {
     0% { background-position: 200% 0; }
@@ -69,9 +78,13 @@
     html { scroll-behavior: auto; }
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
     }
+    /* No hover lifts or press squash either: the element simply changes colour. */
+    .card, .lift, .btn, .btn-red, .btn-ghost, .btn-discord, .btn-icon { translate: none !important; scale: none !important; }
   }
 }
 
@@ -80,7 +93,9 @@
 }
 
 @utility btn {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-3 font-hud text-base font-bold uppercase tracking-[0.14em] text-center transition duration-200 select-none disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-3 font-hud text-base font-bold uppercase tracking-[0.14em] text-center transition duration-200 ease-out select-none disabled:cursor-not-allowed disabled:opacity-60;
+  /* Tactile press: a quick squash on :active (disabled buttons stay put). */
+  &:not(:disabled):active { scale: 0.97; transition-duration: 80ms; }
 }
 
 @utility panel {
@@ -106,16 +121,16 @@
     box-shadow: 0 10px 30px -10px rgb(88 101 242 / 0.7);
   }
   .btn-sm { @apply min-h-9 rounded-md px-3.5 py-2 text-sm tracking-[0.1em]; }
-  .btn-icon { @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-bone-200 transition hover:border-blood-400/60 hover:bg-blood-500/10 hover:text-white; }
+  .btn-icon { @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-bone-200 transition hover:border-blood-400/60 hover:bg-blood-500/10 hover:text-white active:scale-95; }
 
   .panel-glow {
     @apply panel;
     border-color: rgb(208 18 41 / 0.38);
     box-shadow: 0 0 0 1px rgb(208 18 41 / 0.08) inset, 0 0 50px -14px rgb(208 18 41 / 0.45), 0 24px 60px -36px rgb(0 0 0 / 0.95);
   }
-  /* Card with a red edge-glow on hover/focus-within */
+  /* Card with a red edge-glow and a small lift on hover/focus-within */
   .card {
-    @apply panel transition duration-300;
+    @apply panel transition-[translate,border-color,box-shadow,background-color] duration-300 ease-(--ease-out-quint);
   }
   .card:hover, .card:focus-within {
     @apply -translate-y-1 border-blood-500/35;
@@ -164,4 +179,65 @@
     -webkit-background-clip: text; background-clip: text; color: transparent;
     @apply animate-shine;
   }
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────
+ * Everything below only runs when the visitor has not asked for reduced motion.
+ * Entrance and reveal animations use opacity + transform only (compositor-friendly, no layout shift)
+ * and use the `transform` property so they never fight Tailwind's `translate`-based hover lifts.
+ */
+@keyframes enter {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes reveal {
+  from { opacity: 0; transform: translate3d(0, 28px, 0) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+@keyframes flash-ring {
+  0% { box-shadow: 0 0 0 0 rgb(240 65 79 / 0.7); }
+  100% { box-shadow: 0 0 0 14px rgb(240 65 79 / 0); }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Page/hero entrance, staggered with .enter-1 … .enter-6 */
+  .enter { animation: enter 0.7s var(--ease-out-quint) both; }
+  .enter-1 { animation-delay: 70ms; }
+  .enter-2 { animation-delay: 140ms; }
+  .enter-3 { animation-delay: 210ms; }
+  .enter-4 { animation-delay: 280ms; }
+  .enter-5 { animation-delay: 350ms; }
+  .enter-6 { animation-delay: 420ms; }
+
+  /* Scroll reveal: pure CSS scroll-driven animation (no JS, no hidden-until-hydrated content).
+   * Browsers without animation-timeline support simply show the content. Set --i for a stagger. */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal var(--ease-out-quint) both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 6%) entry calc(55% + var(--i, 0) * 6%);
+    }
+  }
+
+  .copied-flash { animation: flash-ring 0.6s ease-out; }
+  .toast-in { animation: toast-in 0.28s var(--ease-out-quint) both; }
+  .skeleton {
+    background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.05) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+}
+
+/* Skeleton block base (colour only; the shimmer above is motion-gated). */
+@layer components {
+  .skeleton { @apply rounded-md bg-ink-700/80; }
+  .skeleton-soft { @apply rounded-md bg-ink-800; }
 }

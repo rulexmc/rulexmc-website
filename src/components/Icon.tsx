@@ -2,7 +2,8 @@
 export type IconName =
   | "discord" | "copy" | "check" | "arrow-right" | "external" | "heart" | "sword" | "globe" | "shield"
   | "portal" | "spark" | "trophy" | "hud" | "devices" | "menu" | "close" | "play" | "users" | "server"
-  | "star" | "chevron-down" | "map" | "coins" | "target" | "info" | "lock" | "zap";
+  | "star" | "chevron-down" | "map" | "coins" | "target" | "info" | "lock" | "zap"
+  | "chevron-right" | "chevron-left" | "search" | "skull" | "clock" | "sort" | "badge-check" | "alert" | "box";
 
 const PATHS: Record<Exclude<IconName, "discord">, React.ReactNode> = {
   copy: <><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h8" /></>,
@@ -31,6 +32,15 @@ const PATHS: Record<Exclude<IconName, "discord">, React.ReactNode> = {
   info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></>,
   lock: <><rect x="4.5" y="10.5" width="15" height="10" rx="2" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></>,
   zap: <path d="M13 3 5 13.5h6L10 21l8-10.5h-6Z" />,
+  "chevron-right": <path d="m9 6 6 6-6 6" />,
+  "chevron-left": <path d="m15 6-6 6 6 6" />,
+  search: <><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></>,
+  skull: <><path d="M12 3a8 8 0 0 0-5 14.2V20a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2.8A8 8 0 0 0 12 3Z" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><path d="M10.5 21v-2.5M13.5 21v-2.5" /></>,
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+  sort: <><path d="M7 4v16M3.5 7.5 7 4l3.5 3.5" /><path d="M17 20V4M13.5 16.5 17 20l3.5-3.5" /></>,
+  "badge-check": <><path d="M12 2.8 14.2 4.6l2.8-.3.9 2.7 2.5 1.4-.6 2.8 1.4 2.5-2.1 1.9-.1 2.9-2.8.6-1.6 2.4L12 20.2l-2.6 1.3-1.6-2.4-2.8-.6-.1-2.9-2.1-1.9 1.4-2.5-.6-2.8 2.5-1.4.9-2.7 2.8.3Z" /><path d="m8.8 12.2 2.2 2.2 4.3-4.6" /></>,
+  alert: <><path d="M12 3.5 2.5 20h19Z" /><path d="M12 10v4.5M12 17.2h.01" /></>,
+  box: <><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5Z" /><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9" /></>,
 };
 
 export function Icon({ name, className = "h-5 w-5", label }: { name: IconName; className?: string; label?: string }) {
