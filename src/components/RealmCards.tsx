@@ -8,10 +8,10 @@ export function RealmCards({ detailed = false }: { detailed?: boolean }) {
   return (
     <ul className="grid gap-5 md:grid-cols-3">
       {REALMS.map((r, i) => (
-        <li key={r.id} id={detailed ? `realm-${r.id}` : undefined} className={`card edge-top flex flex-col overflow-hidden p-6 sm:p-7 ${detailed ? "scroll-mt-24" : ""} ${i === 0 ? "border-blood-500/30" : ""}`}>
+        <li key={r.id} id={detailed ? `realm-${r.id}` : undefined} className={`card edge-top reveal group flex flex-col overflow-hidden p-6 sm:p-7 ${detailed ? "scroll-mt-24" : ""} ${i === 0 ? "border-blood-500/30" : ""}`} style={{ "--i": i } as React.CSSProperties}>
           <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-blood-600/10 blur-2xl" />
           <div className="flex items-center justify-between gap-3">
-            <span className="icon-tile"><Icon name={REALM_ICON[r.id]} className="h-6 w-6" /></span>
+            <span className="icon-tile transition-transform duration-300 ease-(--ease-spring) motion-safe:group-hover:scale-110"><Icon name={REALM_ICON[r.id]} className="h-6 w-6" /></span>
             {i === 0 ? <span className="badge border border-blood-500/50 bg-blood-500/15 text-blood-200">Flagship</span> : null}
           </div>
           <p className="mt-6 font-hud text-xs font-semibold uppercase tracking-[0.28em] text-blood-300">{r.kicker}</p>
@@ -26,8 +26,8 @@ export function RealmCards({ detailed = false }: { detailed?: boolean }) {
             ))}
           </ul>
           {!detailed ? (
-            <Link href={`/server#realm-${r.id}`} className="mt-6 inline-flex items-center gap-2 font-hud text-sm font-bold uppercase tracking-[0.16em] text-blood-300 transition hover:text-white">
-              Learn more <Icon name="arrow-right" className="h-4 w-4" />
+            <Link href={`/server#realm-${r.id}`} className="group/link mt-6 inline-flex items-center gap-2 self-start rounded font-hud text-sm font-bold uppercase tracking-[0.16em] text-blood-300 transition hover:text-white">
+              Learn more <Icon name="arrow-right" className="h-4 w-4 transition-transform duration-200 motion-safe:group-hover/link:translate-x-1" />
               <span className="sr-only">about {r.name}</span>
             </Link>
           ) : null}

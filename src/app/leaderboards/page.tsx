@@ -213,7 +213,7 @@ export default async function LeaderboardsPage({ searchParams }: { searchParams:
                         </td>
                         <td className="px-4 py-3">
                           <Link href={playerHref(r.name)} className="flex min-w-0 items-center gap-3 rounded">
-                            <Avatar name={r.name} size={32} className="transition-transform duration-200 group-hover:scale-110" />
+                            <Avatar name={r.name} size={32} className="transition-transform duration-200 motion-safe:group-hover:scale-110" />
                             <span className="truncate font-hud text-lg font-semibold text-white group-hover:text-blood-200">{r.name}</span>
                           </Link>
                         </td>

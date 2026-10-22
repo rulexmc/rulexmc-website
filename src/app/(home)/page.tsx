@@ -21,7 +21,9 @@ import { getBlock } from "@/lib/content";
 import { prisma } from "@/lib/db";
 import { getStatsProvider, type LeaderboardResult } from "@/lib/stats";
 import { FAQ, SERVER_FACTS, SITE } from "@/lib/site";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, siteJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
+import { playerHref } from "@/lib/leaderboard-params";
 
 export const dynamic = "force-dynamic";
 
@@ -59,34 +61,6 @@ const QUICK_FACTS: { icon: IconName; label: string }[] = [
   { icon: "globe", label: SERVER_FACTS.region },
 ];
 
-function JsonLd({ siteUrl, discord }: { siteUrl: string; discord: string | null }) {
-  const base = siteUrl.replace(/\/$/, "");
-  const data = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${base}/#org`,
-        name: SITE.name,
-        alternateName: SITE.network,
-        url: base,
-        logo: `${base}/icon.svg`,
-        founder: { "@type": "Person", name: SITE.owner },
-        ...(discord ? { sameAs: [discord] } : {}),
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${base}/#website`,
-        name: SITE.name,
-        url: base,
-        description: SITE.description,
-        publisher: { "@id": `${base}/#org` },
-      },
-    ],
-  };
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />;
-}
-
 export default async function HomePage() {
   const cfg = getConfig();
   const [status, about, announcements, top] = await Promise.all([
@@ -96,7 +70,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <JsonLd siteUrl={cfg.siteUrl} discord={cfg.community.discord} />
+      <JsonLd data={siteJsonLd(cfg.siteUrl, cfg.community.discord)} />
 
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden border-b border-white/[0.06]" aria-labelledby="hero-title">
@@ -105,29 +79,29 @@ export default async function HomePage() {
         <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-ink-950" />
         <ParticleCanvas />
         <div className="container-x relative flex flex-col items-center pb-20 pt-14 text-center sm:pb-28 sm:pt-24">
-          <div className="animate-rise"><Logo size="lg" /></div>
-          <div className="mt-7 animate-rise [animation-delay:80ms]">
+          <div className="enter"><Logo size="lg" /></div>
+          <div className="enter enter-1 mt-7">
             <StatusPanel initial={status} variant="compact" />
           </div>
-          <h1 id="hero-title" className="h-display mt-8 max-w-5xl animate-rise text-[2.35rem] leading-[1.02] text-white [animation-delay:140ms] min-[400px]:text-5xl sm:text-6xl lg:text-[5.5rem]">
+          <h1 id="hero-title" className="h-display enter enter-2 mt-8 max-w-5xl text-[2.35rem] leading-[1.02] text-white min-[400px]:text-5xl sm:text-6xl lg:text-[5.5rem]">
             Your heart.<br />
             <span className="shine-text text-glow">Your survival.</span>
           </h1>
-          <p className="lead mt-6 max-w-2xl animate-rise [animation-delay:200ms]">
+          <p className="lead enter enter-3 mt-6 max-w-2xl">
             Steal hearts on Lifesteal, build an empire in Survival, or sharpen your aim in PvP Practice.
             One crossplay network for Java and Bedrock, versions <span className="whitespace-nowrap">{SERVER_FACTS.versions}</span>.
           </p>
-          <div className="mt-9 w-full animate-rise [animation-delay:260ms]">
+          <div className="enter enter-4 mt-9 w-full">
             <CopyAddress address={address} size="lg" note={address ? `Bedrock players: use port ${SERVER_FACTS.bedrockPort}` : undefined} />
           </div>
-          <div className="mt-8 flex w-full max-w-xl animate-rise flex-col gap-3 [animation-delay:320ms] sm:flex-row sm:justify-center">
+          <div className="enter enter-5 mt-8 flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
             <Link href="/server#join" className="btn-red animate-pulse-red px-7">
               <Icon name="play" className="h-4 w-4 fill-current" /> Play now
             </Link>
             <Link href="/leaderboards" className="btn-ghost"><Icon name="trophy" className="h-4 w-4" /> Leaderboards</Link>
             <Link href="/store" className="btn-ghost"><Icon name="star" className="h-4 w-4" /> Store</Link>
           </div>
-          <ul className="mt-12 flex max-w-3xl animate-rise flex-wrap justify-center gap-2.5 [animation-delay:380ms]" aria-label="Server at a glance">
+          <ul className="enter enter-6 mt-12 flex max-w-3xl flex-wrap justify-center gap-2.5" aria-label="Server at a glance">
             {QUICK_FACTS.map((f) => (
               <li key={f.label} className="chip"><Icon name={f.icon} className="h-4 w-4 text-blood-300" />{f.label}</li>
             ))}
@@ -185,7 +159,7 @@ export default async function HomePage() {
       {/* ── Leaderboard teaser + announcements ─────────────── */}
       <div className="container-x py-20 sm:py-24">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr]">
-          <section aria-labelledby="top-killers">
+          <section aria-labelledby="top-killers" className="reveal">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="eyebrow">Hall of hearts</p>
@@ -206,22 +180,24 @@ export default async function HomePage() {
               ) : (
                 <ol>
                   {top.result.rows.map((r) => (
-                    <li key={r.uuid} className="flex items-center gap-4 border-b border-white/[0.05] px-5 py-3 last:border-0">
-                      <span className={`w-6 font-display text-sm font-black ${r.rank === 1 ? "text-blood-300 text-glow" : "text-bone-400"}`}>{r.rank}</span>
-                      <Avatar name={r.name} size={32} />
-                      <span className="min-w-0 flex-1 truncate font-hud text-lg font-semibold text-white">{r.name}</span>
-                      <span className="font-hud text-lg font-bold tabular-nums text-bone-100">{r.kills.toLocaleString("en-US")}<span className="ml-1 text-xs uppercase tracking-wider text-bone-400">kills</span></span>
+                    <li key={r.uuid} className="border-b border-white/[0.05] last:border-0">
+                      <Link href={playerHref(r.name)} className="group flex items-center gap-4 px-5 py-3 transition-colors hover:bg-blood-500/[0.06]">
+                        <span className={`w-6 font-display text-sm font-black ${r.rank === 1 ? "text-blood-300 text-glow" : "text-bone-400"}`}>{r.rank}</span>
+                        <Avatar name={r.name} size={32} className="transition-transform duration-200 motion-safe:group-hover:scale-110" />
+                        <span className="min-w-0 flex-1 truncate font-hud text-lg font-semibold text-white group-hover:text-blood-200">{r.name}</span>
+                        <span className="font-hud text-lg font-bold tabular-nums text-bone-100">{r.kills.toLocaleString("en-US")}<span className="ml-1 text-xs uppercase tracking-wider text-bone-400">kills</span></span>
+                      </Link>
                     </li>
                   ))}
                 </ol>
               )}
-              <Link href="/leaderboards" className="flex items-center justify-between border-t border-white/[0.06] bg-ink-900/60 px-5 py-3 font-hud text-sm font-bold uppercase tracking-[0.16em] text-blood-300 transition hover:text-white">
-                View full leaderboards <Icon name="arrow-right" className="h-4 w-4" />
+              <Link href="/leaderboards" className="group flex items-center justify-between border-t border-white/[0.06] bg-ink-900/60 px-5 py-3 font-hud text-sm font-bold uppercase tracking-[0.16em] text-blood-300 transition hover:text-white">
+                View full leaderboards <Icon name="arrow-right" className="h-4 w-4 transition-transform duration-200 motion-safe:group-hover:translate-x-1" />
               </Link>
             </div>
           </section>
 
-          <section aria-labelledby="news">
+          <section aria-labelledby="news" className="reveal [--i:1]">
             <div className="mb-6">
               <p className="eyebrow">News</p>
               <h2 id="news" className="h-display mt-3 text-2xl text-white sm:text-3xl">Latest announcements</h2>

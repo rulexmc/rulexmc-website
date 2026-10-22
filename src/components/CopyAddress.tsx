@@ -76,7 +76,7 @@ export function CopyAddress({
           <span className="relative inline-flex h-4 w-4">
             {state === "copied"
               ? <Icon key="check" name="check" className="h-4 w-4 animate-pop text-emerald-300" />
-              : <Icon key="copy" name="copy" className="h-4 w-4 transition-transform group-hover:scale-110" />}
+              : <Icon key="copy" name="copy" className="h-4 w-4 transition-transform motion-safe:group-hover:scale-110" />}
           </span>
           {/* Every label is stacked in one grid cell so the button never changes width. */}
           <span className="hidden min-[380px]:inline-grid">

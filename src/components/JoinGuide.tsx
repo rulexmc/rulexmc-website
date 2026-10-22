@@ -23,7 +23,7 @@ export function JoinGuide({ address, host }: { address: string | null; host: str
   const bedrockHost = host ?? SERVER_FACTS.bedrockAddress;
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      <article className="panel edge-top p-6 sm:p-8" aria-labelledby="join-java">
+      <article className="panel edge-top reveal p-6 sm:p-8" aria-labelledby="join-java">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 id="join-java" className="flex items-center gap-3 font-hud text-2xl font-bold uppercase tracking-wider text-white">
             <span className="icon-tile h-10 w-10"><Icon name="server" className="h-5 w-5" /></span> Java Edition
@@ -40,7 +40,7 @@ export function JoinGuide({ address, host }: { address: string | null; host: str
         />
         <div className="mt-7"><CopyAddress address={address} label="Java IP" /></div>
       </article>
-      <article className="panel edge-top p-6 sm:p-8" aria-labelledby="join-bedrock">
+      <article className="panel edge-top reveal p-6 sm:p-8 [--i:1]" aria-labelledby="join-bedrock">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 id="join-bedrock" className="flex items-center gap-3 font-hud text-2xl font-bold uppercase tracking-wider text-white">
             <span className="icon-tile h-10 w-10"><Icon name="devices" className="h-5 w-5" /></span> Bedrock Edition

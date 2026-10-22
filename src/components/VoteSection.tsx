@@ -18,7 +18,7 @@ export function VoteSection() {
         </SectionHeading>
         <ul className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
           {sites.map((s, i) => (
-            <li key={s.href}>
+            <li key={s.href} className="reveal" style={{ "--i": i } as React.CSSProperties}>
               <a
                 href={s.href}
                 target="_blank"
@@ -30,7 +30,7 @@ export function VoteSection() {
                   <span className="block truncate font-hud text-lg font-bold text-white">{s.name}</span>
                   <span className="text-xs uppercase tracking-[0.16em] text-bone-400">Vote &amp; review</span>
                 </span>
-                <Icon name="external" className="h-4 w-4 text-bone-400 transition group-hover:text-blood-300" />
+                <Icon name="external" className="h-4 w-4 text-bone-400 transition duration-200 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 group-hover:text-blood-300" />
                 <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </li>

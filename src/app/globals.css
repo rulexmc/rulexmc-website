@@ -241,3 +241,9 @@
   .skeleton { @apply rounded-md bg-ink-700/80; }
   .skeleton-soft { @apply rounded-md bg-ink-800; }
 }
+
+/* CountUp: the real number stays in the DOM (transparent while tweening); the tween is painted by ::after. */
+.countup { position: relative; display: inline-block; font-variant-numeric: tabular-nums; }
+.countup[data-anim="1"] > span { opacity: 0; }
+.countup[data-anim="1"]::after { content: attr(data-shown); position: absolute; inset-block: 0; inset-inline-start: 0; white-space: nowrap; }
+.countup[data-align="end"][data-anim="1"]::after { inset-inline-start: auto; inset-inline-end: 0; }

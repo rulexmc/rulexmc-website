@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ServerStatus } from "@/lib/status/types";
+import { CountUp } from "./CountUp";
 
 const STATE_STYLE: Record<ServerStatus["state"], { dot: string; label: string; text: string; ring: string }> = {
   online: { dot: "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]", label: "Online", text: "text-emerald-300", ring: "border-emerald-400/30 bg-emerald-400/[0.07]" },
@@ -33,9 +34,12 @@ export function StatusPanel({ initial, variant = "full" }: { initial: ServerStat
 
   const s = STATE_STYLE[status.state];
   const online = status.state === "online" && status.playersOnline !== null;
-  const players = online
-    ? `${status.playersOnline!.toLocaleString("en-US")}${status.playersMax ? ` / ${status.playersMax.toLocaleString("en-US")}` : ""}`
-    : null;
+  const players = online ? (
+    <>
+      <CountUp value={status.playersOnline!} />
+      {status.playersMax ? <span className="text-bone-400"> / {status.playersMax.toLocaleString("en-US")}</span> : null}
+    </>
+  ) : null;
 
   if (variant === "compact") {
     return (
@@ -47,7 +51,7 @@ export function StatusPanel({ initial, variant = "full" }: { initial: ServerStat
       >
         <span className={`h-2.5 w-2.5 rounded-full ${s.dot} ${status.state === "online" ? "animate-pulse" : ""}`} aria-hidden />
         <span className={s.text}>{s.label}</span>
-        {online ? <span className="text-bone-200"><span aria-hidden>· </span>{status.playersOnline!.toLocaleString("en-US")} playing</span> : null}
+        {online ? <span className="text-bone-200"><span aria-hidden>· </span><CountUp value={status.playersOnline!} /> playing</span> : null}
       </div>
     );
   }

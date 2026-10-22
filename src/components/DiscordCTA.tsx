@@ -1,17 +1,17 @@
 import { getConfig } from "@/lib/config";
 import { getDiscordInvite } from "@/lib/discord";
 import { Icon } from "./Icon";
+import { CountUp } from "./CountUp";
 
 /** Discord call-to-action. Member counts are real (Discord's public invite API) and hidden when unavailable. */
 export async function DiscordCTA() {
   const href = getConfig().community.discord;
   if (!href) return null;
   const info = await getDiscordInvite(href);
-  const fmt = (n: number) => n.toLocaleString("en-US");
 
   return (
     <section aria-labelledby="discord-cta" className="container-x py-16 sm:py-20">
-      <div className="relative isolate overflow-hidden rounded-3xl border border-[#5865F2]/30 bg-gradient-to-br from-[#5865F2]/[0.16] via-ink-900 to-blood-900/40 p-8 sm:p-12">
+      <div className="reveal relative isolate overflow-hidden rounded-3xl border border-[#5865F2]/30 bg-gradient-to-br from-[#5865F2]/[0.16] via-ink-900 to-blood-900/40 p-8 sm:p-12">
         <div aria-hidden className="absolute -right-24 -top-24 -z-10 h-72 w-72 rounded-full bg-[#5865F2]/25 blur-3xl" />
         <div aria-hidden className="absolute -bottom-28 -left-16 -z-10 h-72 w-72 rounded-full bg-blood-600/25 blur-3xl" />
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
@@ -29,10 +29,10 @@ export async function DiscordCTA() {
             {info && (info.members !== null || info.online !== null) ? (
               <ul className="mt-5 flex flex-wrap gap-3" aria-label="Discord community size">
                 {info.members !== null ? (
-                  <li className="chip"><Icon name="users" className="h-4 w-4 text-[#c9cdfb]" /> {fmt(info.members)} members</li>
+                  <li className="chip"><Icon name="users" className="h-4 w-4 text-[#c9cdfb]" /> <CountUp value={info.members} /> members</li>
                 ) : null}
                 {info.online !== null ? (
-                  <li className="chip"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden /> {fmt(info.online)} online now</li>
+                  <li className="chip"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden /> <CountUp value={info.online} /> online now</li>
                 ) : null}
               </ul>
             ) : null}
