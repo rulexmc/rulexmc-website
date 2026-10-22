@@ -137,12 +137,13 @@ export default async function PlayerPage({ params }: Props) {
             <Breadcrumbs items={[{ name: "Leaderboards", path: "/leaderboards" }, { name, path: playerHref(name) }]} />
           </div>
           <div className="flex flex-col gap-8 sm:flex-row sm:items-end">
-            <div className="enter enter-1 flex h-[200px] w-[100px] shrink-0 items-end justify-center self-center sm:self-auto">
+            <div className="enter enter-1 flex h-[240px] w-[100px] shrink-0 items-end justify-center self-center sm:self-auto">
+              {/* mc-heads.net body renders are 5:12 (200×480 at size 200); size 200 = crisp at 2x DPR. */}
               <Image
                 src={bodyUrl(name, 200)}
                 alt={`${name}'s Minecraft skin`}
                 width={100}
-                height={200}
+                height={240}
                 unoptimized
                 priority
                 className="[image-rendering:pixelated] drop-shadow-[0_0_28px_rgba(208,18,41,0.4)]"
@@ -150,7 +151,14 @@ export default async function PlayerPage({ params }: Props) {
             </div>
             <div className="min-w-0 flex-1 text-center sm:text-left">
               <p className="eyebrow enter">Player profile</p>
-              <h1 className="h-display enter enter-1 mt-3 break-words text-4xl leading-none text-white sm:text-5xl lg:text-6xl" data-testid="player-name">{name}</h1>
+              <h1
+                className="h-display enter enter-1 mt-3 break-words text-[min(var(--name-fit),2.25rem)] leading-none text-white sm:text-[min(var(--name-fit),3rem)] lg:text-6xl"
+                // Shrink long names (up to 16 chars) on narrow screens so they stay on one line instead of breaking mid-name.
+                style={{ "--name-fit": `calc((100vw - 2.5rem) / ${(Math.max(name.length, 6) * 0.86).toFixed(2)})` } as React.CSSProperties}
+                data-testid="player-name"
+              >
+                {name}
+              </h1>
               <div className="enter enter-2 mt-5 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 {verified ? (
                   <span className="badge border border-emerald-400/40 bg-emerald-400/10 text-emerald-300" data-testid="verified-badge"

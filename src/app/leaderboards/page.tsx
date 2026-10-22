@@ -65,8 +65,8 @@ function SummaryTiles({ summary, live }: { summary: StatsSummary; live: boolean 
   return (
     <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.05] lg:min-w-[26rem]" aria-label={live ? "Leaderboard totals" : "Leaderboard totals (sample data)"}>
       {tiles.map((t) => (
-        <div key={t.label} className="bg-ink-850/90 px-4 py-3.5">
-          <dt className="table-head truncate">{t.label}</dt>
+        <div key={t.label} className="bg-ink-850/90 px-3 py-3.5 sm:px-4">
+          <dt className="table-head leading-tight">{t.label}</dt>
           <dd className="mt-1 truncate font-hud text-xl font-bold text-white sm:text-2xl">
             {typeof t.value === "number" ? (live ? <CountUp value={t.value} /> : t.value.toLocaleString("en-US")) : t.value}
           </dd>

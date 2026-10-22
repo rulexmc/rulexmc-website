@@ -72,7 +72,7 @@ export function LeaderboardSearch({ initial, metric, order }: { initial: string;
         />
         <span
           aria-hidden
-          className={`absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-blood-400/30 border-t-blood-400 transition-opacity motion-safe:animate-spin ${pending ? "opacity-100" : "opacity-0"}`}
+          className={`absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-blood-400/30 border-t-blood-400 transition-opacity ${pending ? "opacity-100 motion-safe:animate-spin" : "opacity-0"}`}
         />
       </div>
       <button type="submit" className="btn-ghost btn-sm">Search</button>

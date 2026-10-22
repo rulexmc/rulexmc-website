@@ -56,7 +56,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
           <h2 id="mc" className="font-hud text-xl font-bold uppercase tracking-wider text-white">Minecraft account</h2>
           <div className="mt-5 flex items-center gap-5">
             {user.mcUsername ? (
-              <Image src={bodyUrl(user.mcUsername, 160)} alt={`${user.mcUsername}'s skin`} width={80} height={160} unoptimized className="[image-rendering:pixelated] drop-shadow-[0_0_20px_rgba(208,18,41,0.35)]" />
+              <Image src={bodyUrl(user.mcUsername, 160)} alt={`${user.mcUsername}'s skin`} width={80} height={192} unoptimized className="[image-rendering:pixelated] drop-shadow-[0_0_20px_rgba(208,18,41,0.35)]" />
             ) : (
               <div className="flex h-40 w-20 items-center justify-center rounded border border-dashed border-white/15 text-xs text-bone-400">No skin</div>
             )}

@@ -22,7 +22,9 @@ describe("metric helpers", () => {
   it("formats reported values", () => {
     expect(formatMetric(row(), "kills")).toBe("1,234");
     expect(formatMetric(row(), "playtime")).toBe("3h 1m");
-    expect(formatMetric(row({ balance: 1520.5 }), "balance")).toBe("1,520.5");
+    expect(formatMetric(row({ balance: 1520.5 }), "balance")).toBe("1,520.50");
+    expect(formatMetric(row({ balance: 1200 }), "balance")).toBe("1,200");
+    expect(formatMetric(row({ balance: 0.004 }), "balance")).toBe("0.00");
     expect(formatMetric(row({ hearts: 0 }), "hearts")).toBe("0");
     expect(formatMetric(row({ level: 42 }), "level")).toBe("42");
   });

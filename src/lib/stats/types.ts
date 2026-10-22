@@ -111,7 +111,8 @@ export function formatPlaytime(seconds: number): string {
 
 export function formatBalance(v: number | null): string {
   if (v === null) return "—";
-  return v.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  // Whole amounts stay whole ("1,200"); fractional ones always show cents ("1,234.50", not "1,234.5").
+  return v.toLocaleString("en-US", Number.isInteger(v) ? { maximumFractionDigits: 0 } : { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 /** Display string for a metric; "—" when not reported. */
