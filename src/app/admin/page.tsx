@@ -81,7 +81,7 @@ export default async function AdminOverview({ searchParams }: { searchParams: Fl
         </ul>
       </section>
 
-      <section className="panel overflow-x-auto p-5">
+      <section className="panel overflow-x-auto p-5" tabIndex={0} role="region" aria-label="Recent accounts table">
         <h2 className="font-hud text-lg font-bold uppercase tracking-wider text-white">Recent accounts</h2>
         <table className="mt-3 w-full min-w-[600px] text-left text-sm">
           <thead><tr className="table-head"><th className="py-2">User</th><th>Minecraft</th><th>Role</th><th className="text-right">Action</th></tr></thead>

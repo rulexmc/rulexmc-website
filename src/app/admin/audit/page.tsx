@@ -13,7 +13,7 @@ export default async function AdminAudit({ searchParams }: { searchParams: Promi
   ]);
   const pages = Math.max(1, Math.ceil(total / PAGE));
   return (
-    <div className="panel overflow-x-auto p-5">
+    <div className="panel overflow-x-auto p-5" tabIndex={0} role="region" aria-label="Audit log table">
       <table className="w-full min-w-[720px] text-left text-sm">
         <caption className="mb-3 text-left font-hud text-lg font-bold uppercase tracking-wider text-white">Audit log ({total})</caption>
         <thead><tr className="table-head"><th className="py-2">Time (UTC)</th><th>Actor</th><th>Action</th><th>Target</th><th>IP</th><th>Details</th></tr></thead>

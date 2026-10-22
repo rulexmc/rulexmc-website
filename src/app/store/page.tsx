@@ -218,7 +218,7 @@ export default async function StorePage({ searchParams }: { searchParams: Promis
             {allFeatures.length > 0 && ranks.length > 1 ? (
               <section className="mt-20" aria-labelledby="compare">
                 <SectionHeading eyebrow="Compare" title="Rank comparison" id="compare" />
-                <div className="panel overflow-x-auto">
+                <div className="panel overflow-x-auto" tabIndex={0} role="region" aria-label="Rank comparison table (scrolls sideways on small screens)">
                   <table className="w-full min-w-[560px] text-left text-sm">
                     <caption className="sr-only">Features included in each rank{anyExample ? " (example listings)" : ""}</caption>
                     <thead className="border-b border-white/5 bg-ink-900/70">

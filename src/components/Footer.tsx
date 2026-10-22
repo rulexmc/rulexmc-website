@@ -57,7 +57,7 @@ export function Footer() {
       <BlockStrip />
       <div className="container-x grid grid-cols-2 gap-x-6 gap-y-10 py-14 md:grid-cols-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div className="col-span-2 md:col-span-3 lg:col-span-1">
-          <Link href="/" className="inline-block rounded-md" aria-label={`${cfg.siteName} home`}><Logo size="sm" /></Link>
+          <Link href="/" className="inline-block rounded-md"><Logo size="sm" /></Link>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-bone-400">
             {SITE.network}: Lifesteal, Survival and PvP Practice. Run by {SITE.owner}.
           </p>

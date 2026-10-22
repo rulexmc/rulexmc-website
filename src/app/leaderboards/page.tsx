@@ -183,7 +183,7 @@ export default async function LeaderboardsPage({ searchParams }: { searchParams:
           <>
             {showPodium ? <Podium rows={result.rows} metric={metric} /> : null}
             <div className="panel overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Leaderboard table (scrolls sideways on small screens)">
                 <table className="w-full text-left md:min-w-[720px]" data-testid="leaderboard-table" aria-describedby="metric-blurb">
                   <caption className="sr-only">
                     Players ranked by {METRIC_LABELS[metric]}, {order === "desc" ? "highest first" : "lowest first"}
