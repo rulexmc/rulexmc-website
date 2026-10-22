@@ -63,3 +63,16 @@ describe("safeNextPath", () => {
     expect(safeNextPath("/\\evil.com")).toBe("/portal");
   });
 });
+
+describe("ingest level field", () => {
+  it("accepts an optional, nullable, bounded integer level", async () => {
+    const { ingestPlayerSchema } = await import("@/lib/validation");
+    const base = { uuid: "00000000-0000-4000-8000-000000000001", name: "Alex" };
+    expect(ingestPlayerSchema.safeParse({ ...base, level: 42 }).success).toBe(true);
+    expect(ingestPlayerSchema.safeParse({ ...base, level: null }).success).toBe(true);
+    expect(ingestPlayerSchema.safeParse(base).success).toBe(true);
+    expect(ingestPlayerSchema.safeParse({ ...base, level: -1 }).success).toBe(false);
+    expect(ingestPlayerSchema.safeParse({ ...base, level: 1.5 }).success).toBe(false);
+    expect(ingestPlayerSchema.safeParse({ ...base, level: 2_000_000 }).success).toBe(false);
+  });
+});

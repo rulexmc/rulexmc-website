@@ -1,7 +1,7 @@
 import type {
   LeaderboardQuery, LeaderboardResult, Metric, PlayerStatRow, StatsProvider, StatsSummary,
 } from "./types";
-import { metricValue } from "./types";
+import { OPTIONAL_METRICS, metricValue } from "./types";
 
 /**
  * SAMPLE / DEV provider. Deterministic fake players for local development and
@@ -29,6 +29,8 @@ function mulberry32(seed: number) {
 
 export function buildSamplePlayers(): PlayerStatRow[] {
   const rand = mulberry32(1337);
+  // Separate stream so adding fields never changes the existing sample values.
+  const levelRand = mulberry32(4242);
   return NAMES.map((name, i) => {
     const hex = (n: number) => Math.floor(rand() * 16 ** n).toString(16).padStart(n, "0");
     const kills = Math.floor(rand() * 900);
@@ -40,6 +42,8 @@ export function buildSamplePlayers(): PlayerStatRow[] {
       balance: Math.round(rand() * 2_500_000) / 100,
       playtimeSeconds: Math.floor(rand() * 400 * 3600),
       hearts: 1 + Math.floor(rand() * 20),
+      // Every 8th sample player has no reported level, to exercise the "not reported" states.
+      level: i % 8 === 7 ? null : 1 + Math.floor(levelRand() * 120),
       lastSeen: new Date(Date.UTC(2026, 0, 1) + i * 3600_000),
       updatedAt: null,
     };
@@ -52,10 +56,15 @@ export class SampleStatsProvider implements StatsProvider {
   readonly label = "Sample data (development)";
   private players = buildSamplePlayers();
 
+  /** Same ordering as the database provider: metric, then lower-case name; unreported optional metrics are excluded. */
   private sorted(metric: Metric, order: "asc" | "desc") {
     const dir = order === "asc" ? 1 : -1;
-    return [...this.players].sort(
-      (a, b) => dir * (metricValue(a, metric) - metricValue(b, metric)) || a.name.localeCompare(b.name),
+    const eligible = OPTIONAL_METRICS.has(metric) ? this.players.filter((p) => metricValue(p, metric) !== null) : this.players;
+    const lower = (n: string) => n.toLowerCase();
+    return [...eligible].sort(
+      (a, b) =>
+        dir * ((metricValue(a, metric) ?? 0) - (metricValue(b, metric) ?? 0)) ||
+        (lower(a.name) < lower(b.name) ? -1 : lower(a.name) > lower(b.name) ? 1 : 0),
     );
   }
 

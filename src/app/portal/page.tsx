@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
-import { getStatsProvider, formatBalance, formatPlaytime, METRICS, METRIC_LABELS, type Metric } from "@/lib/stats";
+import { getStatsProvider, formatMetric, kdRatio, metricValue, METRICS, METRIC_LABELS, type Metric } from "@/lib/stats";
+import { playerHref } from "@/lib/leaderboard-params";
+import { getAllRanks } from "@/lib/player-profile";
 import { bodyUrl } from "@/lib/avatar";
 import { LinkCodeForm, LinkUsernameForm } from "@/components/PortalForms";
 import { SampleBadge } from "@/components/SampleBadge";
@@ -33,8 +35,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
 
   const lookup = user.mcVerified && user.mcUuid ? user.mcUuid : user.mcUsername;
   const stats = lookup ? await provider.getPlayer(lookup).catch(() => null) : null;
-  const ranks: Partial<Record<Metric, number | null>> = {};
-  if (stats) for (const m of METRICS) ranks[m] = await provider.getRank(stats.uuid, m).catch(() => null);
+  const ranks: Partial<Record<Metric, number | null>> = stats ? await getAllRanks(provider, stats.uuid) : {};
 
   return (
     <div className="container-x py-14">
@@ -106,26 +107,22 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
           ) : (
             <>
               {!user.mcVerified ? <p className="mt-2 text-xs text-amber-200">Shown for the unverified name {user.mcUsername}. Verify to lock it to your account.</p> : null}
-              <dl className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-white/5 sm:grid-cols-4">
+              <dl className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-white/5 sm:grid-cols-3">
                 {METRICS.map((m) => {
-                  const value =
-                    m === "kills" ? stats.kills.toLocaleString("en-US")
-                    : m === "deaths" ? stats.deaths.toLocaleString("en-US")
-                    : m === "balance" ? formatBalance(stats.balance)
-                    : formatPlaytime(stats.playtimeSeconds);
+                  const reported = metricValue(stats, m) !== null;
                   return (
                     <div key={m} className="bg-ink-850 p-4">
                       <dt className="table-head">{METRIC_LABELS[m]}</dt>
-                      <dd className="mt-1 font-hud text-2xl font-bold text-white">{value}</dd>
-                      <dd className="text-xs text-bone-400">{ranks[m] ? `Rank #${ranks[m]}` : m === "balance" && stats.balance === null ? "Not reported" : "Unranked"}</dd>
+                      <dd className="mt-1 font-hud text-2xl font-bold tabular-nums text-white">{formatMetric(stats, m)}</dd>
+                      <dd className="text-xs text-bone-400">{ranks[m] ? `Rank #${ranks[m]}` : !reported ? "Not reported" : "Unranked"}</dd>
                     </div>
                   );
                 })}
               </dl>
               <div className="mt-4 flex flex-wrap gap-4 text-sm text-bone-300">
-                <span>K/D: <strong className="text-white">{(stats.kills / Math.max(1, stats.deaths)).toFixed(2)}</strong></span>
-                {stats.hearts !== null ? <span>Hearts: <strong className="text-blood-300">♥ {stats.hearts}</strong></span> : null}
-                {stats.lastSeen ? <span>Last seen: {stats.lastSeen.toLocaleDateString("en-US")}</span> : null}
+                <span>K/D: <strong className="text-white">{kdRatio(stats)}</strong></span>
+                {stats.lastSeen ? <span>Last seen: {stats.lastSeen.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata" })}</span> : null}
+                <Link href={playerHref(stats.name)} className="link">View public profile</Link>
               </div>
             </>
           )}

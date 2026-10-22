@@ -91,6 +91,7 @@ export const ingestPlayerSchema = z.object({
   playtimeSeconds: nonNegInt.optional(),
   balance: z.number().finite().min(-1e15).max(1e15).optional(),
   hearts: z.number().int().min(0).max(1000).nullable().optional(),
+  level: z.number().int().min(0).max(1_000_000).nullable().optional(),
   lastSeen: z.iso.datetime({ offset: true }).optional(),
 });
 

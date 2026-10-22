@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
         ...(p.playtimeSeconds !== undefined && { playtimeSeconds: p.playtimeSeconds }),
         ...(p.balance !== undefined && { balance: new Prisma.Decimal(p.balance.toFixed(2)), hasBalance: true }),
         ...(p.hearts !== undefined && { hearts: p.hearts }),
+        ...(p.level !== undefined && { level: p.level }),
         ...(p.lastSeen !== undefined && { lastSeen: new Date(p.lastSeen) }),
       };
       return prisma.playerStats.upsert({ where: { uuid: p.uuid }, create: { uuid: p.uuid, ...data }, update: data });
