@@ -28,3 +28,51 @@ export function pageMetadata({
     ...(noIndex ? { robots: { index: false, follow: false } } : {}),
   };
 }
+
+export interface Crumb {
+  name: string;
+  path: string;
+}
+
+function absolute(path: string, siteUrl: string): string {
+  return `${siteUrl.replace(/\/$/, "")}${path === "/" ? "" : path}` || siteUrl;
+}
+
+/** schema.org BreadcrumbList for a trail of site-relative paths. */
+export function breadcrumbJsonLd(trail: Crumb[], siteUrl: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: absolute(c.path, siteUrl) })),
+  };
+}
+
+/** Organization + WebSite graph, shared by the home page. */
+export function siteJsonLd(siteUrl: string, discord: string | null) {
+  const base = siteUrl.replace(/\/$/, "");
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${base}/#org`,
+        name: SITE.name,
+        alternateName: SITE.network,
+        url: base,
+        logo: `${base}/icon.svg`,
+        slogan: SITE.tagline,
+        founder: { "@type": "Person", name: SITE.owner },
+        ...(discord ? { sameAs: [discord] } : {}),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${base}/#website`,
+        name: SITE.name,
+        url: base,
+        description: SITE.description,
+        inLanguage: "en",
+        publisher: { "@id": `${base}/#org` },
+      },
+    ],
+  };
+}
