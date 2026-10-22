@@ -6,7 +6,8 @@
  *   CHROME_PATH=/usr/bin/google-chrome node scripts/e2e.mjs
  * Creates a throwaway player account (e2e-<timestamp>@example.test), links a name,
  * verifies it through the ingest API, files a report, then signs in as admin to
- * publish an announcement and resolve the report.
+ * publish an announcement and resolve the report. Also covers keyboard skip link, copy feedback,
+ * leaderboard tabs/search/ordering and player profiles (200 / 308 canonical / 404, verified badge).
  */
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
@@ -23,7 +24,8 @@ const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH 
 const ctx = await browser.newContext();
 const page = await ctx.newPage();
 const consoleErrors = [];
-page.on("console", (m) => { if (m.type() === "error") consoleErrors.push(m.text()); });
+// The intentional 404 page visit logs a "Failed to load resource: 404" console error; ignore that one.
+page.on("console", (m) => { if (m.type() === "error" && !/status of 404/.test(m.text())) consoleErrors.push(m.text()); });
 
 const stamp = Date.now().toString(36);
 const email = `e2e-${stamp}@example.test`;
@@ -31,14 +33,21 @@ const mcName = `E2E_${stamp}`.slice(0, 16);
 
 console.log("Home");
 await page.goto(BASE + "/");
+await page.keyboard.press("Tab");
+check(/skip to content/i.test(await page.evaluate(() => document.activeElement?.textContent || "")), "first Tab stop is the skip link");
 check((await page.locator("h1").innerText()).toUpperCase().includes("YOUR HEART"), "hero heading");
-await page.getByTestId("server-address").first().waitFor();
-check(await page.getByTestId("server-address").first().isVisible(), "server address visible");
+// Scope to <main>: the footer has its own copy button that renders before the streamed hero.
+const heroAddress = page.locator("main").getByTestId("server-address").first();
+await heroAddress.waitFor();
+check(await heroAddress.isVisible(), "server address visible");
 await ctx.grantPermissions(["clipboard-read", "clipboard-write"], { origin: BASE });
-await page.getByRole("button", { name: /copy server address/i }).first().click();
-check(await page.getByRole("button", { name: /copy server address/i }).first().getByText("Copied!").waitFor({ timeout: 3000 }).then(() => true, () => false), "copy button feedback");
+const copyBtn = page.locator("main").getByRole("button", { name: /copy server address/i }).first();
+await copyBtn.click();
+check(await page.locator('button[data-state="copied"]').first().waitFor({ timeout: 3000 }).then(() => true, () => false), "copy button switches to copied state");
+check(await page.getByRole("status").getByText(/Copied .* paste it into Minecraft/).waitFor({ timeout: 3000 }).then(() => true, () => false), "copy toast announced");
+check(await copyBtn.evaluate((el) => el === document.activeElement), "copy button keeps focus after feedback");
 const clip = await page.evaluate(() => navigator.clipboard.readText()).catch(() => "");
-check(clip.length > 0 && clip === (await page.getByTestId("server-address").first().innerText()), `clipboard contains address (${clip})`);
+check(clip.length > 0 && clip === (await heroAddress.innerText()), `clipboard contains address (${clip})`);
 
 console.log("Register");
 await page.goto(BASE + "/register");
@@ -64,15 +73,50 @@ const codeEl = page.locator("code", { hasText: "/verify RX-" });
 await codeEl.waitFor();
 const code = (await codeEl.innerText()).replace("/verify ", "").trim();
 check(/^RX-[A-Z0-9]{6}$/.test(code), `verification code shown (${code})`);
+const mcUuid = `00000000-0000-4000-8000-${Date.now().toString(16).padStart(12, "0").slice(-12)}`;
 if (secret) {
   const res = await fetch(BASE + "/api/ingest/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
-    body: JSON.stringify({ code, name: mcName, uuid: `00000000-0000-4000-8000-${Date.now().toString(16).padStart(12, "0").slice(-12)}` }),
+    body: JSON.stringify({ code, name: mcName, uuid: mcUuid }),
   });
   check(res.ok, `ingest verify accepted (${res.status})`);
   await page.reload();
   check(await page.getByText("✓ Verified").waitFor({ timeout: 5000 }).then(() => true, () => false), "portal shows Verified");
+
+  console.log("Player profile");
+  const pr = await page.goto(`${BASE}/player/${mcName}`);
+  check(pr?.status() === 200, `verified player without stats has a profile (${pr?.status()})`);
+  check(await page.getByTestId("verified-badge").isVisible(), "profile shows Verified badge");
+  check(await page.getByText(/hasn.t sent any stats/).isVisible(), "honest empty state before any stats");
+  const ing = await fetch(BASE + "/api/ingest/stats", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
+    body: JSON.stringify({ source: "e2e", players: [{ uuid: mcUuid, name: mcName, kills: 9, deaths: 3, playtimeSeconds: 5400, level: 7 }] }),
+  });
+  check(ing.ok, `stats ingested for e2e player (${ing.status})`);
+  await page.goto(`${BASE}/player/${mcName.toLowerCase()}`);
+  check(new URL(page.url()).pathname === `/player/${mcName}`, "lower-case profile URL redirects to canonical name");
+  check(await page.getByTestId("verified-badge").isVisible(), "verified badge kept once stats exist");
+  check(await page.getByText("3.00").first().isVisible().catch(() => false), "K/D derived from real kills/deaths (9/3)");
+}
+const nf = await page.goto(BASE + "/player/NoSuchPlayer_zq9");
+check(nf?.status() === 404, `unknown player → 404 (${nf?.status()})`);
+
+console.log("Leaderboards");
+await page.goto(BASE + "/leaderboards");
+await page.getByRole("navigation", { name: "Leaderboard metric" }).getByRole("link", { name: /hearts/i }).click();
+await page.waitForURL((u) => u.searchParams.get("metric") === "hearts", { waitUntil: "commit", timeout: 10000 });
+check(await page.getByRole("navigation", { name: "Leaderboard metric" }).locator('[aria-current="page"]').innerText().then((t) => /hearts/i.test(t)), "Hearts tab active after click");
+await page.getByRole("searchbox", { name: /search players/i }).or(page.getByPlaceholder("Search player…")).first().fill("SmokeTest");
+await page.waitForURL((u) => u.searchParams.get("q") === "SmokeTest", { waitUntil: "commit", timeout: 5000 }).catch(() => {});
+check(new URL(page.url()).searchParams.get("q") === "SmokeTest" && new URL(page.url()).searchParams.get("metric") === "hearts", "search updates the URL and keeps the metric");
+const rowLink = page.locator('main a[href^="/player/SmokeTest"]').first();
+if (await rowLink.count()) {
+  await Promise.all([page.waitForURL((u) => u.pathname.startsWith("/player/")), rowLink.click()]);
+  check(await page.locator("h1").textContent().then((t) => (t || "").includes("SmokeTest")), "leaderboard row opens the player profile");
+} else {
+  console.log("  • no SmokeTest players on this instance (run scripts/smoke.sh with INGEST_SECRET first) — skipping row click");
 }
 
 console.log("Report");
@@ -120,8 +164,8 @@ if (adminEmail && adminPassword) {
   check(true, "report resolved");
 
   await page.goto(BASE + "/admin/audit");
-  check(await page.getByText("report.update").first().isVisible(), "audit log records report.update");
-  check(await page.getByText("announcement.create").first().isVisible(), "audit log records announcement.create");
+  check(await page.getByText("report.update").first().waitFor({ timeout: 5000 }).then(() => true, () => false), "audit log records report.update");
+  check(await page.getByText("announcement.create").first().waitFor({ timeout: 5000 }).then(() => true, () => false), "audit log records announcement.create");
 }
 
 check(consoleErrors.length === 0, `no browser console errors${consoleErrors.length ? `: ${consoleErrors.slice(0, 3).join(" | ")}` : ""}`);
