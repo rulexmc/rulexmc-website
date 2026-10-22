@@ -49,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${orbitron.variable} ${rajdhani.variable} ${inter.variable}`}>
       <body className="flex min-h-screen flex-col">
+        <span id="top" aria-hidden className="absolute top-0" />
         <a href="#main" className="btn-red btn-sm sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60]">
           Skip to content
         </a>

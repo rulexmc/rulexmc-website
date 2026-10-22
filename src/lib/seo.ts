@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { SITE } from "@/lib/site";
+import { SERVER_FACTS, SITE } from "@/lib/site";
+import type { ServerStatus } from "@/lib/status/types";
 
 export const OG_IMAGE = { url: "/opengraph-image", width: 1200, height: 630, alt: "RuleX MC: Your heart. Your survival." };
 
@@ -74,5 +75,33 @@ export function siteJsonLd(siteUrl: string, discord: string | null) {
         publisher: { "@id": `${base}/#org` },
       },
     ],
+  };
+}
+
+/**
+ * schema.org GameServer for the Minecraft server. Live fields (status, players online) are only included
+ * when the status lookup actually returned them; nothing is guessed.
+ */
+export function gameServerJsonLd(siteUrl: string, address: string | null, status: ServerStatus) {
+  const base = siteUrl.replace(/\/$/, "");
+  const online = status.state === "online";
+  return {
+    "@context": "https://schema.org",
+    "@type": "GameServer",
+    "@id": `${base}/server#gameserver`,
+    name: `${SITE.name} Minecraft server`,
+    url: `${base}/server`,
+    description: `${SERVER_FACTS.editions} Minecraft network (${SERVER_FACTS.versions}) with Lifesteal, Survival and PvP Practice.${address ? ` Address: ${address}.` : ""}`,
+    provider: { "@id": `${base}/#org` },
+    game: {
+      "@type": "VideoGame",
+      name: "Minecraft",
+      gamePlatform: ["Minecraft: Java Edition", "Minecraft: Bedrock Edition"],
+      playMode: "MultiPlayer",
+    },
+    ...(status.state === "online" || status.state === "offline"
+      ? { serverStatus: online ? "https://schema.org/Online" : "https://schema.org/OfflineTemporarily" }
+      : {}),
+    ...(online && status.playersOnline !== null ? { playersOnline: status.playersOnline } : {}),
   };
 }

@@ -14,7 +14,8 @@ import { getConfig } from "@/lib/config";
 import { getServerStatus } from "@/lib/status";
 import { getBlock, getStoredBlock } from "@/lib/content";
 import { FAQ, SERVER_FACTS, SITE } from "@/lib/site";
-import { pageMetadata } from "@/lib/seo";
+import { gameServerJsonLd, pageMetadata } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Server Info, IP & How to Join",
@@ -47,8 +48,10 @@ export default async function ServerPage() {
   return (
     <>
       <FaqJsonLd items={FAQ} />
+      <JsonLd data={gameServerJsonLd(cfg.siteUrl, address, status)} />
       <PageHero
         eyebrow="Server info"
+        breadcrumbs={[{ name: "Server", path: "/server" }]}
         title={<>Join the <span className="text-gradient-red">RuleX Network</span></>}
         actions={
           <>
